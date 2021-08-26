@@ -18,7 +18,7 @@ class MemberTokens(commands.Cog, name='Token Commands'):
         """
             Gives tokens to a Member
         """
-        f = {'member_id': member.id, 'server_id': ctx.guild.id}
+        f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         db.RobBot.tokens.update_one(f, {'$inc': {'tokens': tokens}}, upsert=True)
         await ctx.send(f'{ctx.author.display_name} gave {tokens} tokens to {member.display_name}')
 
@@ -29,7 +29,7 @@ class MemberTokens(commands.Cog, name='Token Commands'):
         """
         if not member:
             member = ctx.author
-        f = {'member_id': member.id, 'server_id': ctx.guild.id}
+        f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         t = await db.RobBot.tokens.find_one(f)
         await ctx.send(f'{member.display_name} has {t["tokens"]} tokens')
 

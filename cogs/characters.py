@@ -31,7 +31,7 @@ class Characters(commands.Cog, name='Characters'):
         """
         if not member:
             member = ctx.author
-        f = {'member_id': member.id, 'server_id': ctx.guild.id}
+        f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         t = await db.RobBot.characters.find_one(f)
         await ctx.send(f'{member.display_name} has {t["characters"]} as characters')
 
@@ -41,7 +41,7 @@ class Characters(commands.Cog, name='Characters'):
             deletes a character to your list
         """
         characters = list(characters)
-        f = {'member_id': member.id, 'server_id': ctx.guild.id}
+        f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         exist_pc = await db.RobBot.characters.find_one(f)
         for pc in characters:
             if pc in exist_pc['characters']:
