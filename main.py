@@ -28,7 +28,7 @@ async def on_ready():  # When the bot is ready
     print(bot.user)  # Prints the bot's username and identifier
 
 
-extensions = ['cogs.adminTools', 'cogs.devTools', 'cogs.tokens', 'cogs.points']
+extensions = ['cogs.adminTools', 'cogs.devTools', 'cogs.tokens', 'cogs.points', 'cogs.characters']
 
 for extension in extensions:
     bot.load_extension(extension)  # Loads every extension.

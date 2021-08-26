@@ -5,7 +5,8 @@ import discord
 from discord.ext import commands
 import utils.checks as checks
 from main import db
-from utils.pipelines import profile_pipeline
+from utils.pipelines import profile_pipeline, mod_pipeline
+
 
 class OwnerCommands(commands.Cog, name='DM Commands'):
     """
@@ -27,12 +28,22 @@ class OwnerCommands(commands.Cog, name='DM Commands'):
     @commands.command(name='profile', aliases=[])
     async def profile(self, ctx, member: discord.Member):
         """
-        displays
+        displays full profile
         """
         returnstr = ''
-        async for operation in db.RobBot.MainQuest.aggregate(profile_pipeline):
-            for key, value in operation.items():
-                returnstr += f'{key}: {value} \n'
+        f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
+        fields = ['names', 'MainQuest', 'characters', 'guilds', 'points', 'tokens', 'trophies']
+        for each in fields:
+            a = await db.RobBot[each].find_one(f)
+            print(a)
+            returnstr += f'{each}: {a} \n'
+        # TODO: instances of member.id need to be stringified.
+        # p = mod_pipeline(member.id, ctx.guild.id)
+        # print(p)
+        # async for operation in db.RobBot.names.aggregate(p):
+        #     print(operation)
+        #     for key, value in operation.items():
+        #         returnstr += f'{key}: {value} \n'
         await ctx.send(returnstr)
 
     @checks.is_owner()
@@ -44,23 +55,17 @@ class OwnerCommands(commands.Cog, name='DM Commands'):
         all_members = ctx.guild.members
 
         for member in all_members:
+            f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
             if not member.bot:
-                db.RobBot.names.update_one({'member_id': member.id, 'server_id': ctx.guild.id},
-                                            {'$set': {'display_name': member.display_name}}, upsert=True)
-                db.RobBot.tokens.update_one({'member_id': member.id, 'server_id': ctx.guild.id},
-                                            {'$set': {'tokens': 0}}, upsert=True)
-                db.RobBot.points.update_one({'member_id': member.id, 'server_id': ctx.guild.id},
-                                            {'$set': {'points': 0}}, upsert=True)
-                db.RobBot.MainQuest.update_one({'member_id': member.id, 'server_id': ctx.guild.id},
-                                               {'$set': {'MainQuest': 0}}, upsert=True)
-                db.RobBot.characters.update_one({'member_id': member.id, 'server_id': ctx.guild.id},
-                                                {'$set': {'characters': []}}, upsert=True)
-                db.RobBot.guilds.update_one({'member_id': member.id, 'server_id': ctx.guild.id},
-                                            {'$set': {'guilds': []}}, upsert=True)
-                db.RobBot.trophies.update_one({'member_id': member.id, 'server_id': ctx.guild.id},
-                                              {'$set': {'trophies': {
-                                                  'platinum': 0, 'gold': 0, 'silver': 0, 'copper': 0}
-                                              }}, upsert=True)
+                db.RobBot.names.update_one(f, {'$set': {'display_name': member.display_name}}, upsert=True)
+                db.RobBot.tokens.update_one(f, {'$set': {'tokens': 0}}, upsert=True)
+                db.RobBot.points.update_one(f, {'$set': {'points': 0}}, upsert=True)
+                db.RobBot.MainQuest.update_one(f, {'$set': {'MainQuest': 0}}, upsert=True)
+                db.RobBot.characters.update_one(f, {'$set': {'characters': []}}, upsert=True)
+                db.RobBot.guilds.update_one(f, {'$set': {'guilds': []}}, upsert=True)
+                db.RobBot.trophies.update_one(f, {'$set': {'trophies': {
+                    'platinum': 0, 'gold': 0, 'silver': 0, 'copper': 0}
+                }}, upsert=True)
         await ctx.send("Created All Member Keys for this Server")
 
     # @commands.command(name='listmembers', aliases=['lm'])

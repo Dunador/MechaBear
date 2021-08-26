@@ -1,5 +1,10 @@
 profile_pipeline = [
     {
+        '$match': {
+            'member_id': 'xxxxxx',
+            'server_id': 'yyyyyy'
+        }
+    }, {
         '$lookup': {
             'from': 'MainQuest',
             'localField': 'member_id',
@@ -78,3 +83,9 @@ profile_pipeline = [
     }
 ]
 
+
+def mod_pipeline(member_id: int, server_id: int):
+    p = profile_pipeline.copy()
+    p[0]['$match']['member_id'] = str(member_id)
+    p[0]['$match']['server_id'] = str(server_id)
+    return p

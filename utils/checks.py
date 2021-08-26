@@ -13,7 +13,7 @@ def is_owner():
 
 def is_admin():
     async def predicate(ctx):
-        if ctx.author.permissions_in(ctx.channel).administrator:
+        if ctx.author.permissions_in(ctx.channel).administrator or ctx.author.id == ctx.bot.author_id:
             return True
         else:
             await ctx.send("You are not an admin")
