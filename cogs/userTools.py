@@ -15,6 +15,7 @@ class UserCommands(commands.Cog, name='User Commands'):
         """
         Runs a test command
         """
+        await ctx.message.delete()
         await ctx.send('Done')  # Sends a message where content='Done'
 
 

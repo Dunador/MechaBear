@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from utils import checks
 from main import db
-
+from utils.helpers import *
 
 class Characters(commands.Cog, name='Characters'):
     """
@@ -13,33 +13,39 @@ class Characters(commands.Cog, name='Characters'):
         self.bot = bot
 
     @commands.command(name='add_pc')
-    async def add_pc(self, ctx, member: discord.Member, *characters):
+    async def add_pc(self, ctx, member, *characters):
         """
             adds a character to your list
         """
-        f = {'member_id': member.id, 'server_id': ctx.guild.id}
+        await ctx.message.delete()
+        member = m_search(ctx, member)
+        f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         characters = list(characters)
-
         for pc in characters:
             db.RobBot.characters.update_one(f, {'$push': {'characters': pc}}, upsert=True)
         await ctx.send(f'{ctx.author.display_name} adds {characters} to their list')
 
     @commands.command(name='list_pc')
-    async def list_pc(self, ctx, member: discord.Member = None):
+    async def list_pc(self, ctx, member=None):
         """
             Checks PCs of a member
         """
+        await ctx.message.delete()
         if not member:
             member = ctx.author
+        else:
+            member = m_search(ctx, member)
         f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         t = await db.RobBot.characters.find_one(f)
         await ctx.send(f'{member.display_name} has {t["characters"]} as characters')
 
     @commands.command(name='del_pc')
-    async def del_pc(self, ctx, member: discord.Member, *characters):
+    async def del_pc(self, ctx, member, *characters):
         """
             deletes a character to your list
         """
+        await ctx.message.delete()
+        member = m_search(ctx, member)
         characters = list(characters)
         f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         exist_pc = await db.RobBot.characters.find_one(f)
