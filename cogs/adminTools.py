@@ -4,6 +4,7 @@ from main import db, bot as client
 from utils.pipelines import profile_pipeline, mod_pipeline
 from utils.helpers import *
 
+
 class OwnerCommands(commands.Cog, name='DM Commands'):
     """
   Commands for the owner of the Bot
@@ -34,18 +35,18 @@ class OwnerCommands(commands.Cog, name='DM Commands'):
         # returnstr = f'{member.display_name}\n'
         p = mod_pipeline(member.id, ctx.guild.id)
 
-        test_embed = discord.Embed(title='Profile Viewer',
-                                   type='rich',
-                                   description=f'Viewing profile for {member.name}')
-        test_embed.set_footer(text=f'{member.display_name}')
-        test_embed.set_thumbnail(url=member.avatar_url)
+        e = discord.Embed(title='Profile Viewer',
+                          type='rich',
+                          description=f'Viewing profile for {member.name}')
+        e.set_footer(text=f'{member.display_name}')
+        e.set_thumbnail(url=member.avatar_url)
         async for operation in db.RobBot.names.aggregate(p):
             for key, value in operation.items():
-                test_embed.add_field(name=f'{key.title()}',
-                                     value=f'{value}',
-                                     inline=True)
+                e.add_field(name=f'{key.title()}',
+                            value=f'{value}',
+                            inline=True)
 
-        await ctx.send(embed=test_embed)
+        await ctx.send(embed=e)
 
     @checks.is_owner()
     @commands.command(name='dbsetup', aliases=['dbs'])
@@ -68,6 +69,7 @@ class OwnerCommands(commands.Cog, name='DM Commands'):
                 db.RobBot.trophies.update_one(f, {'$set': {'trophies': {
                     'platinum': 0, 'gold': 0, 'silver': 0, 'copper': 0}
                 }}, upsert=True)
+
         await ctx.send("Created All Member Keys for this Server")
 
     @client.event

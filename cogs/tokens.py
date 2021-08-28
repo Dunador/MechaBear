@@ -23,8 +23,7 @@ class MemberTokens(commands.Cog, name='Token Commands'):
         member = m_search(ctx, member)
         f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         db.RobBot.tokens.update_one(f, {'$inc': {'tokens': tokens}}, upsert=True)
-        # insert transaction
-        insert_transaction(ctx,'give_token', tokens, f)
+        await insert_transaction(ctx,'give_token', tokens, f)
         await ctx.send(f'{ctx.author.display_name} gave {tokens} tokens to {member.display_name}')
 
     @commands.command(name='check_tokens')

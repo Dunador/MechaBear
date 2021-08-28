@@ -13,6 +13,9 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
 
     def __init__(self, bot):
         self.bot = bot
+        self.add_color = discord.Colour.green()
+        self.del_color = discord.Colour.red()
+        self.info_color = discord.Colour.orange()
 
     @checks.is_dm()
     @commands.command(name='fight')
@@ -23,12 +26,22 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
         await ctx.message.delete()
         if outcome not in ['w', 'l', 'W', 'L']:
             await ctx.send("You must provide a W for win or L for lost")
+        else:
+            outcome = 'win' if outcome.lower() == 'w' else 'loss'
         member = m_search(ctx, member)
         f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
-        db.RobBot.arena.update_one(f, {'$set': {'Beast': beast, 'Outcome': outcome}}, upsert=True)
-        insert_transaction(ctx, 'fight_beast', (beast, outcome), f)
-        await ctx.send(
-            f'{member.display_name} {"wins" if outcome.lower() == "w" else "loses"} against {beast}. It is now recorded.')
+        fi = {'beast': beast, 'outcome': outcome}
+        fight = {**f, **fi}
+        await db.RobBot.arena.insert_one(fight)
+        await insert_transaction(ctx, 'fight_beast', (beast, outcome), f)
+        e = discord.Embed(title='Arena Fight',
+                          type='rich',
+                          description=f'Executed by {ctx.author.display_name}',
+                          colour=self.add_color if outcome == 'win' else self.del_color)
+        e.set_footer(text=f'for {member.display_name}')
+        e.set_thumbnail(url=member.avatar_url)
+        e.add_field(name=beast.title(), value=f'Resulted in a {outcome}')
+        await ctx.send(embed=e, delete_after=90)
 
     @checks.is_dm()
     @commands.command(name='fight_record')
@@ -40,10 +53,15 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
         member = m_search(ctx, member)
         f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         fights = db.RobBot.arena.find(f)
-        returnstr = f'Fight Record for **{member.display_name}**\n\n'
+        e = discord.Embed(title='Arena Fight Record',
+                          type='rich',
+                          description=f'{member.display_name}',
+                          colour=self.info_color)
+        e.set_footer(text=f'executed by: {ctx.author.display_name} ')
+        e.set_thumbnail(url=member.avatar_url)
         for fight in await fights.to_list(length=10):
-            returnstr += f'{fight["_id"].generation_time.date()} : {fight["Beast"]}- {"Win" if fight["Outcome"].lower() == "w" else "Loss"}\n '
-        await ctx.send(returnstr)
+            e.add_field(name=fight["_id"].generation_time.date(), value=f'{fight["beast"]} - *{fight["outcome"].title()}*')
+        await ctx.send(embed=e, delete_after=90)
 
 
 def setup(bot):
