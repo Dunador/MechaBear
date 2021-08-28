@@ -26,9 +26,24 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
         member = m_search(ctx, member)
         f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         db.RobBot.arena.update_one(f, {'$set': {'Beast': beast, 'Outcome': outcome}}, upsert=True)
-        insert_transaction('fight_beast', (beast, outcome), f)
+        insert_transaction(ctx, 'fight_beast', (beast, outcome), f)
         await ctx.send(
             f'{member.display_name} {"wins" if outcome.lower() == "w" else "loses"} against {beast}. It is now recorded.')
+
+    @checks.is_dm()
+    @commands.command(name='fight_record')
+    async def fight_record(self, ctx, member):
+        """
+            checks the fight records
+        """
+        await ctx.message.delete()
+        member = m_search(ctx, member)
+        f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
+        fights = db.RobBot.arena.find(f)
+        returnstr = f'Fight Record for **{member.display_name}**\n\n'
+        for fight in await fights.to_list(length=10):
+            returnstr += f'{fight["_id"].generation_time.date()} : {fight["Beast"]}- {"Win" if fight["Outcome"].lower() == "w" else "Loss"}\n '
+        await ctx.send(returnstr)
 
 
 def setup(bot):

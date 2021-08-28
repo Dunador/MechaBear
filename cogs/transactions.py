@@ -18,7 +18,7 @@ class TransactionLogs(commands.Cog, name='Transaction Logs'):
         member = m_search(ctx, member)
         returnstr = ''
         f = {'exec_by': str(member.id), 'server_id': str(ctx.guild.id)}
-        results = db.RobBot.transactions.find(filter=f, sort=[("timestamp", 1)], limit=n)
+        results = db.RobBot.transactions.find(filter=f, sort=[("timestamp", -1)])
         for transaction in await results.to_list(length=10):
             returnstr += f'On {transaction["timestamp"].date()}, {member.display_name} executed a ' \
                          f'{transaction["transaction"]} command with data {transaction["data"]} \n'

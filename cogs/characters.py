@@ -27,12 +27,7 @@ class Characters(commands.Cog, name='Characters'):
         characters = list(characters)
         for pc in characters:
             db.RobBot.characters.update_one(f, {'$push': {'characters': pc}}, upsert=True)
-
-        # insert transaction
-        db.RobBot.transactions.update_one(f, {
-            '$set': {'exec_by': str(ctx.author.id), 'transaction': 'add_pc', 'data': characters,
-                     'timestamp': datetime.utcnow()}})
-
+        insert_transaction(ctx, 'add_pc', characters, f)
         await ctx.send(f'{ctx.author.display_name} adds {characters} to '
                        f'{member.display_name if ctx.author.id != member.id else "their"} list')
 
@@ -65,11 +60,7 @@ class Characters(commands.Cog, name='Characters'):
                 exist_pc['characters'].remove(pc)
         db.RobBot.characters.update_one(f, {'$set': {'characters': exist_pc['characters']}}, upsert=True)
 
-        # insert transaction
-        db.RobBot.transactions.update_one(f, {
-            '$set': {'exec_by': str(ctx.author.id), 'transaction': 'del_pc', 'data': characters,
-                     'timestamp': datetime.utcnow()}})
-
+        insert_transaction(ctx,'del_pc', characters, f)
         await ctx.send(f'{ctx.author.display_name} modifies their characters to {exist_pc["characters"]}')
 
 

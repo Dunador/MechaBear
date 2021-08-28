@@ -31,13 +31,21 @@ class OwnerCommands(commands.Cog, name='DM Commands'):
             member = ctx.author
         else:
             member = m_search(ctx, member)
-        returnstr = f'{member.display_name}\n'
+        # returnstr = f'{member.display_name}\n'
         p = mod_pipeline(member.id, ctx.guild.id)
+
+        test_embed = discord.Embed(title='Profile Viewer',
+                                   type='rich',
+                                   description=f'Viewing profile for {member.name}')
+        test_embed.set_footer(text=f'{member.display_name}')
+        test_embed.set_thumbnail(url=member.avatar_url)
         async for operation in db.RobBot.names.aggregate(p):
-            print(operation)
             for key, value in operation.items():
-                returnstr += f'{key}: {value} \n'
-        await ctx.send(returnstr)
+                test_embed.add_field(name=f'{key.title()}',
+                                     value=f'{value}',
+                                     inline=True)
+
+        await ctx.send(embed=test_embed)
 
     @checks.is_owner()
     @commands.command(name='dbsetup', aliases=['dbs'])

@@ -23,7 +23,7 @@ class MemberPoints(commands.Cog, name='Points Commands'):
         member = m_search(ctx, member)
         f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         db.RobBot.points.update_one(f, {'$inc': {'points': points}}, upsert=True)
-        insert_transaction('give_points', points, f)
+        insert_transaction(ctx,'give_points', points, f)
         await ctx.send(f'{ctx.author.display_name} gave {points} points to {member.display_name}')
 
     @commands.command(name='check_points')

@@ -23,7 +23,7 @@ class MainQuest(commands.Cog, name='MainQuest Commands'):
         member = m_search(ctx, member)
         f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         db.RobBot.MainQuest.update_one(f, {'$inc': {'MainQuest': quest}}, upsert=True)
-        insert_transaction('complete_quest', quest, f)
+        insert_transaction(ctx,'complete_quest', quest, f)
         await ctx.send(f'{member.display_name} completes Main Quest #{quest}')
 
     @commands.command(name='check_quest')
@@ -40,6 +40,18 @@ class MainQuest(commands.Cog, name='MainQuest Commands'):
         t = await db.RobBot.MainQuest.find_one(f)
         await ctx.send(f'{member.display_name} has Main Quest# {t["MainQuest"]} completed')
 
+    @checks.is_admin()
+    @commands.command(name='remove_quest')
+    async def remove_quest(self, ctx, member, quest: int):
+        """
+            Takes Main Quest  to a Member
+        """
+        await ctx.message.delete()
+        member = m_search(ctx, member)
+        f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
+        db.RobBot.MainQuest.update_one(f, {'$dec': {'MainQuest': quest}}, upsert=True)
+        insert_transaction(ctx,'remove_quest', quest, f)
+        await ctx.send(f'{member.display_name} Loses {quest} Main Quest')
 
 def setup(bot):
     bot.add_cog(MainQuest(bot))

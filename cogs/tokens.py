@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from utils import checks
 from main import db
-from utils.helpers import m_search
+from utils.helpers import *
 from datetime import datetime
 
 class MemberTokens(commands.Cog, name='Token Commands'):
@@ -24,9 +24,7 @@ class MemberTokens(commands.Cog, name='Token Commands'):
         f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         db.RobBot.tokens.update_one(f, {'$inc': {'tokens': tokens}}, upsert=True)
         # insert transaction
-        db.RobBot.transactions.update_one(f, {
-            '$set': {'exec_by': str(ctx.author.id), 'transaction': 'give_tokens', 'data': tokens,
-                     'timestamp': datetime.utcnow()}})
+        insert_transaction(ctx,'give_token', tokens, f)
         await ctx.send(f'{ctx.author.display_name} gave {tokens} tokens to {member.display_name}')
 
     @commands.command(name='check_tokens')
