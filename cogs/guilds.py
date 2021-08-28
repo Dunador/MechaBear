@@ -3,6 +3,7 @@ from discord.ext import commands
 from utils import checks
 from main import db
 from utils.helpers import *
+from datetime import datetime
 
 class Guilds(commands.Cog, name='Guilds'):
     """
@@ -23,6 +24,7 @@ class Guilds(commands.Cog, name='Guilds'):
         guilds = list(guilds)
         for pc in guilds:
             db.RobBot.guilds.update_one(f, {'$push': {'guilds': pc}}, upsert=True)
+        insert_transaction('add_guild', guilds, f)
         await ctx.send(f'{ctx.author.display_name} adds {guilds} to their list')
 
     @commands.command(name='list_guilds')
@@ -53,6 +55,7 @@ class Guilds(commands.Cog, name='Guilds'):
             if g in exist_g['guilds']:
                 exist_g['guilds'].remove(g)
         db.RobBot.guilds.update_one(f, {'$set': {'guilds': exist_g['guilds']}}, upsert=True)
+        insert_transaction('del_guild', guilds, f)
         await ctx.send(f'{ctx.author.display_name} modifies their guilds to {exist_g["guilds"]}')
 
 

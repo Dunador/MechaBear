@@ -1,8 +1,12 @@
+import datetime
+
 import discord
 from discord.ext import commands
 from utils import checks
 from main import db
 from utils.helpers import *
+from datetime import datetime
+
 
 class Characters(commands.Cog, name='Characters'):
     """
@@ -23,7 +27,14 @@ class Characters(commands.Cog, name='Characters'):
         characters = list(characters)
         for pc in characters:
             db.RobBot.characters.update_one(f, {'$push': {'characters': pc}}, upsert=True)
-        await ctx.send(f'{ctx.author.display_name} adds {characters} to their list')
+
+        # insert transaction
+        db.RobBot.transactions.update_one(f, {
+            '$set': {'exec_by': str(ctx.author.id), 'transaction': 'add_pc', 'data': characters,
+                     'timestamp': datetime.utcnow()}})
+
+        await ctx.send(f'{ctx.author.display_name} adds {characters} to '
+                       f'{member.display_name if ctx.author.id != member.id else "their"} list')
 
     @commands.command(name='list_pc')
     async def list_pc(self, ctx, member=None):
@@ -53,6 +64,12 @@ class Characters(commands.Cog, name='Characters'):
             if pc in exist_pc['characters']:
                 exist_pc['characters'].remove(pc)
         db.RobBot.characters.update_one(f, {'$set': {'characters': exist_pc['characters']}}, upsert=True)
+
+        # insert transaction
+        db.RobBot.transactions.update_one(f, {
+            '$set': {'exec_by': str(ctx.author.id), 'transaction': 'del_pc', 'data': characters,
+                     'timestamp': datetime.utcnow()}})
+
         await ctx.send(f'{ctx.author.display_name} modifies their characters to {exist_pc["characters"]}')
 
 

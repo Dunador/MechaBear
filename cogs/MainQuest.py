@@ -3,6 +3,7 @@ from discord.ext import commands
 from utils import checks
 from main import db
 from utils.helpers import *
+from datetime import datetime
 
 class MainQuest(commands.Cog, name='MainQuest Commands'):
     """
@@ -22,6 +23,7 @@ class MainQuest(commands.Cog, name='MainQuest Commands'):
         member = m_search(ctx, member)
         f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
         db.RobBot.MainQuest.update_one(f, {'$inc': {'MainQuest': quest}}, upsert=True)
+        insert_transaction('complete_quest', quest, f)
         await ctx.send(f'{member.display_name} completes Main Quest #{quest}')
 
     @commands.command(name='check_quest')

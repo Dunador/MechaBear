@@ -15,28 +15,28 @@ intents = discord.Intents(
 )
 
 bot = commands.Bot(
-    command_prefix="?",  # Change to desired prefix
-    case_insensitive=True,  # Commands aren't case-sensitive
+    command_prefix="?",
+    case_insensitive=True,
     intents=intents
 )
-bot.author_id = config.BOT_AUTHOR_ID  # Change to your discord id!!!
+bot.author_id = config.BOT_AUTHOR_ID
 
 
 @bot.event
-async def on_ready():  # When the bot is ready
+async def on_ready():
     print("I'm in")
-    print(bot.user)  # Prints the bot's username and identifier
+    print(bot.user)
     g_guilds = bot.guilds
 
 
 extensions = ['cogs.userTools', 'cogs.adminTools', 'cogs.devTools', 'cogs.tokens', 'cogs.points', 'cogs.characters',
-              'cogs.guilds', 'cogs.MainQuest']
+              'cogs.guilds', 'cogs.MainQuest', 'cogs.transactions', 'cogs.arena']
 
 for extension in extensions:
-    bot.load_extension(extension)  # Loads every extension.
+    bot.load_extension(extension)
 
-# keep_alive()  # Starts a webserver to be pinged.
+
 token = config.TOKEN
-bot.run(token)  # Starts the bot
+bot.run(token)
 
-#TODO: delete the originating message
+# TODO: make embeds

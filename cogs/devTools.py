@@ -15,25 +15,22 @@ class DevCommands(commands.Cog, name='Developer Commands'):
         """
         return ctx.author.id == self.bot.author_id
 
-    @commands.command(  # Decorator to declare where a command is.
-        name='reload',  # Name of the command, defaults to function name.
-        aliases=['rl']  # Aliases for the command.
-    )
+    @commands.command(name='reload', aliases=['rl'])
     async def reload(self, ctx, cog):
         """
         Reloads a cog.
         """
         await ctx.message.delete()
-        extensions = self.bot.extensions  # A list of the bot's cogs/extensions.
-        if cog == 'all':  # Lets you reload all cogs at once
+        extensions = self.bot.extensions
+        if cog == 'all':
             for extension in extensions:
-                self.bot.unload_extension(cog)
-                self.bot.load_extension(cog)
+                self.bot.unload_extension(extension)
+                self.bot.load_extension(extension)
             await ctx.send('Reloaded all Cogs')
         if cog in extensions:
             self.bot.unload_extension(cog)  # Unloads the cog
             self.bot.load_extension(cog)  # Loads the cog
-            await ctx.send(f'Reloaded the {cog}, master.')  # Sends a message where content='Done'
+            await ctx.send(f'Reloaded the {cog[5:].title()}, master.')  # Sends a message where content='Done'
         else:
             await ctx.send('Unknown Cog')  # If the cog isn't found/loaded.
 
@@ -74,6 +71,24 @@ class DevCommands(commands.Cog, name='Developer Commands'):
         base_string += "\n".join([str(cog) for cog in self.bot.extensions])
         base_string += "\n```"
         await ctx.send(base_string)
+
+    @commands.command(name="tembed")
+    async def tembed(self, ctx):
+        """
+        TEST EMBEDS
+        """
+        test_embed = discord.Embed(title='Test Embed Title',
+                                   type='rich',
+                                   description='The description of the Embed')
+        test_embed.set_footer(text='This is a test footer')
+        test_embed.add_field(name=f'{ctx.author.display_name}',
+                             value=f'You have been here since {ctx.author.joined_at}',
+                             inline=True)
+        test_embed.add_field(name=f'{ctx.author.id}',
+                             value=f'Your top role is {ctx.author.top_role}',
+                             inline=True)
+        await ctx.send(embed=test_embed)
+
 
 def setup(bot):
     bot.add_cog(DevCommands(bot))

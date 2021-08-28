@@ -8,6 +8,7 @@ def is_owner():
             return True
         else:
             await ctx.send("Only the Bot owner can do this.")
+
     return commands.check(predicate)
 
 
@@ -17,4 +18,15 @@ def is_admin():
             return True
         else:
             await ctx.send("You are not an admin")
+
+    return commands.check(predicate)
+
+
+def is_dm():
+    async def predicate(ctx):
+        for role in ctx.author.roles:
+            if role.name == "Quest Master" or role.name == "Dungeon Master":
+                return True
+        else:
+            await ctx.send("You are not a DM/GM")
     return commands.check(predicate)

@@ -1,7 +1,3 @@
-import asyncio
-import json
-
-import discord
 from discord.ext import commands
 import utils.checks as checks
 from main import db, bot as client
@@ -68,6 +64,7 @@ class OwnerCommands(commands.Cog, name='DM Commands'):
 
     @client.event
     async def on_member_join(self, member):
+        f = {'member_id': str(member.id), 'server_id': str(member.guild.id)}
         if not member.bot:
             db.RobBot.names.update_one(f, {'$set': {'names': member.display_name}}, upsert=True)
             db.RobBot.tokens.update_one(f, {'$set': {'tokens': 0}}, upsert=True)
