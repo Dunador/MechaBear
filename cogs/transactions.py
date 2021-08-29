@@ -5,7 +5,7 @@ from utils import checks
 from main import db
 
 
-class TransactionLogs(commands.Cog, name='Transaction Logs'):
+class TransactionLogs(commands.Cog, name='Transactions'):
     """These are the transaction log commands commands"""
 
     def __init__(self, bot):

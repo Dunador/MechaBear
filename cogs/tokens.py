@@ -5,7 +5,7 @@ from main import db
 from utils.helpers import *
 from datetime import datetime
 
-class MemberTokens(commands.Cog, name='Token Commands'):
+class MemberTokens(commands.Cog, name='Tokens'):
     """
   Commands for the managing tokens
   """

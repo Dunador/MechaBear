@@ -3,7 +3,7 @@ from discord.ext import commands
 from utils.helpers import m_search
 
 
-class DevCommands(commands.Cog, name='Developer Commands'):
+class DevCommands(commands.Cog, name='Developer', command_attrs=dict(hidden=True)):
     """These are the developer commands"""
 
     def __init__(self, bot):

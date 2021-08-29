@@ -5,7 +5,7 @@ from utils.helpers import *
 from datetime import datetime
 
 
-class MemberPoints(commands.Cog, name='Points Commands'):
+class MemberPoints(commands.Cog, name='Points'):
     """
       Commands for the managing points
     """
@@ -17,7 +17,7 @@ class MemberPoints(commands.Cog, name='Points Commands'):
     @commands.command(name='give_points')
     async def give_points(self, ctx, member, points: int):
         """
-            Gives tokens to a Member
+            Gives points to a Member
         """
         await ctx.message.delete()
         member = m_search(ctx, member)

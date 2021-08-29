@@ -5,7 +5,7 @@ from utils.pipelines import profile_pipeline, mod_pipeline
 from utils.helpers import *
 
 
-class OwnerCommands(commands.Cog, name='DM Commands'):
+class OwnerCommands(commands.Cog, name='Owner'):
     """
   Commands for the owner of the Bot
   """
@@ -14,10 +14,10 @@ class OwnerCommands(commands.Cog, name='DM Commands'):
         self.bot = bot
 
     @checks.is_owner()
-    @commands.command(name='server', aliases=[])
+    @commands.command(name='server', aliases=[], hidden=True)
     async def server(self, ctx):
         """
-        displays what guild you in
+
         """
         await ctx.send(ctx.guild.id)
 
@@ -25,16 +25,14 @@ class OwnerCommands(commands.Cog, name='DM Commands'):
     @commands.command(name='profile', aliases=[])
     async def profile(self, ctx, member=None):
         """
-        displays full profile
+        Displays a Members profile.
         """
         await ctx.message.delete()
         if member is None:
             member = ctx.author
         else:
             member = m_search(ctx, member)
-        # returnstr = f'{member.display_name}\n'
         p = mod_pipeline(member.id, ctx.guild.id)
-
         e = discord.Embed(title='Profile Viewer',
                           type='rich',
                           description=f'Viewing profile for {member.name}')
@@ -49,7 +47,7 @@ class OwnerCommands(commands.Cog, name='DM Commands'):
         await ctx.send(embed=e)
 
     @checks.is_owner()
-    @commands.command(name='dbsetup', aliases=['dbs'])
+    @commands.command(name='dbsetup', aliases=['dbs'], hidden=True)
     async def dbsetup(self, ctx):
         """
         Creates the initial db of the server.

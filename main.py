@@ -29,8 +29,8 @@ async def on_ready():
     g_guilds = bot.guilds
 
 
-extensions = ['cogs.userTools', 'cogs.adminTools', 'cogs.devTools', 'cogs.tokens', 'cogs.points', 'cogs.characters',
-              'cogs.guilds', 'cogs.MainQuest', 'cogs.transactions', 'cogs.arena']
+extensions = ['cogs.userTools', 'cogs.adminTools', 'cogs.devTools', 'cogs.tokens', 'cogs.characters',
+              'cogs.guilds', 'cogs.MainQuest', 'cogs.transactions', 'cogs.arena', 'cogs.twitter']
 
 for extension in extensions:
     bot.load_extension(extension)
