@@ -26,7 +26,6 @@ bot.author_id = config.BOT_AUTHOR_ID
 async def on_ready():
     print("I'm in")
     print(bot.user)
-    g_guilds = bot.guilds
 
 
 extensions = ['cogs.userTools', 'cogs.adminTools', 'cogs.devTools', 'cogs.tokens', 'cogs.characters',
@@ -40,3 +39,6 @@ token = config.TOKEN
 bot.run(token)
 
 # TODO: make embeds
+# TODO: add a way to add Crafters Certification
+# TODO: connect names of characters to levels so that you can build your name
+# TODO: Role Sign-up, # Welcome Questionnaire # Character Submission # VSheet Application # Quest Tag —> Role-sign-up

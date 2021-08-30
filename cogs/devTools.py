@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from utils.helpers import m_search
+import utils.checks as checks
 
 
 class DevCommands(commands.Cog, name='Developer', command_attrs=dict(hidden=True)):
@@ -88,6 +89,12 @@ class DevCommands(commands.Cog, name='Developer', command_attrs=dict(hidden=True
                              value=f'Your top role is {ctx.author.top_role}',
                              inline=True)
         await ctx.send(embed=test_embed)
+
+    @checks.is_admin()
+    @commands.command(name='say')
+    async def say(self, ctx, *msg):
+        await ctx.message.delete()
+        await ctx.send(' '.join(msg))
 
 
 def setup(bot):

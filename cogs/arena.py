@@ -21,7 +21,7 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
     @commands.command(name='fight')
     async def fight_beast(self, ctx, member, beast, outcome='L'):
         """
-            gives a win
+        Usage: fight [member] [beast] [W or L]
         """
         await ctx.message.delete()
         if outcome not in ['w', 'l', 'W', 'L']:
@@ -47,7 +47,7 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
     @commands.command(name='fight_record')
     async def fight_record(self, ctx, member):
         """
-            checks the fight records
+        Usage: fight_record [member]
         """
         await ctx.message.delete()
         member = m_search(ctx, member)
