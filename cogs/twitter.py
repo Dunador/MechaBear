@@ -47,10 +47,11 @@ class TwitterCommands(commands.Cog, name='Peregrine'):
         """
         await ctx.send('What will be your @ name')
 
-        def check(m):
-            return m.author == ctx.author
+        def workflow_m_check(m):
+            if m.author.id == ctx.author.id:
+                return True
 
-        msg = await client.wait_for('message', check=check, timeout=30)
+        msg = await client.wait_for('message', check=workflow_m_check, timeout=30)
         await msg.delete()
         msg = "@"+msg.content
         await ctx.send('what is the image url?')

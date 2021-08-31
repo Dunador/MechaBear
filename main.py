@@ -38,7 +38,6 @@ for extension in extensions:
 token = config.TOKEN
 bot.run(token)
 
-# TODO: make embeds
 # TODO: add a way to add Crafters Certification
 # TODO: connect names of characters to levels so that you can build your name
 # TODO: Role Sign-up, # Welcome Questionnaire # Character Submission # VSheet Application # Quest Tag —> Role-sign-up

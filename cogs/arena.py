@@ -63,6 +63,47 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
             e.add_field(name=fight["_id"].generation_time.date(), value=f'{fight["beast"]} - *{fight["outcome"].title()}*')
         await ctx.send(embed=e, delete_after=90)
 
+    @checks.is_dm()
+    @commands.command(name='arena')
+    async def arena_workflow(self, ctx):
+        """
+        Workflow for Arena Beasts
+        """
+        def workflow_m_check(m):
+            if m.author.id == ctx.author.id:
+                return True
+
+        await ctx.message.delete()
+        # get a valid member
+        await ctx.send("Who got in a fight?")
+        fmember = await client.wait_for('message', check=workflow_m_check, timeout=30)
+        member = m_search(ctx, fmember.content)
+        # get the beast
+        await ctx.send("What beast?")
+        beast = await client.wait_for('message', check=workflow_m_check, timeout=30)
+        #get the outcome
+        await ctx.send(f'Did {member.display_name} `win` or `loss`?')
+        outcome = await client.wait_for('message', check=workflow_m_check, timeout=30)
+        #build the database entry
+        f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
+        fi = {'beast': beast.content, 'outcome': outcome.content}
+        fight = {**f, **fi}
+        await db.RobBot.arena.insert_one(fight)
+        await insert_transaction(ctx, 'fight_beast', (beast.content, outcome.content), f)
+        e = discord.Embed(title='Arena Fight',
+                          type='rich',
+                          description=f'{member.display_name}',
+                          colour=self.add_color)
+        e.set_footer(text=f'exec by: {ctx.author.display_name} ')
+        e.set_thumbnail(url=member.avatar_url)
+        e.add_field(name=beast.content.title(), value=f'Resulted in a {outcome.content.title()}')
+
+        await beast.delete()
+        await fmember.delete()
+        await outcome.delete()
+
+        await ctx.send(embed=e, delete_after=90)
+
 
 def setup(bot):
     bot.add_cog(ArenaCommands(bot))

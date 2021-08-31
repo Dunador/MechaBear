@@ -38,10 +38,19 @@ class OwnerCommands(commands.Cog, name='Owner'):
                           description=f'Viewing profile for {member.name}')
         e.set_footer(text=f'{member.display_name}')
         e.set_thumbnail(url=member.avatar_url)
+
         async for operation in db.RobBot.names.aggregate(p):
             for key, value in operation.items():
+                value_str = ''
+                if not value:
+                    value_str += "None"
+                elif value is not str:
+                    for x in value:
+                        value_str += f'{x}\n'
+                else:
+                    value_str += value
                 e.add_field(name=f'{key.title()}',
-                            value=f'{value}',
+                            value=value_str,
                             inline=True)
 
         await ctx.send(embed=e)

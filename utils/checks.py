@@ -34,3 +34,6 @@ def is_dm():
         else:
             await ctx.send("You are not a DM/GM")
     return commands.check(predicate)
+
+
+

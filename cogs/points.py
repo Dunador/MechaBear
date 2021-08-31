@@ -41,7 +41,5 @@ class MemberPoints(commands.Cog, name='Points'):
         await ctx.send(f'{member.display_name} has {t["points"]} points')
 
 
-# TODO: add spend points
-
 def setup(bot):
     bot.add_cog(MemberPoints(bot))
