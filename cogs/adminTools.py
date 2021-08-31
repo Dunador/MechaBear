@@ -80,7 +80,7 @@ class OwnerCommands(commands.Cog, name='Owner'):
         await ctx.send("Created All Member Keys for this Server")
 
     @client.event
-    async def on_member_join(self, member):
+    async def on_member_join(member):
         f = {'member_id': str(member.id), 'server_id': str(member.guild.id)}
         if not member.bot:
             db.RobBot.names.update_one(f, {'$set': {'names': member.display_name}}, upsert=True)

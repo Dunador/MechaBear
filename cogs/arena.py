@@ -104,6 +104,8 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
 
         await ctx.send(embed=e, delete_after=90)
 
+#TODO. do checks for Win, Loss, Tie
+
 
 def setup(bot):
     bot.add_cog(ArenaCommands(bot))
