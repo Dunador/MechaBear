@@ -9,3 +9,5 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD')
 MONGO_URL = os.environ.get('MONGO_URL')
 MONGO_DB = os.environ.get('MONGO_DB')
 # DEFAULT_STATUS = os.environ.get('DISCORD_STATUS', f'API')
+
+SLASH_GUILDS = [435645321029353472]
