@@ -1,9 +1,7 @@
-import discord
 from discord.ext import commands
 from utils import checks
-from main import db
 from utils.helpers import *
-from datetime import datetime
+from dislash import *
 
 
 class MainQuest(commands.Cog, name='Main Quest'):
