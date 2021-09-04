@@ -11,7 +11,7 @@ db = motor.motor_asyncio.AsyncIOMotorClient(
 
 intents = discord.Intents(
     guilds=True, members=True, messages=True, reactions=True,
-    bans=False, emojis=False, integrations=False, webhooks=False, invites=False, voice_states=False, presences=False,
+    bans=False, emojis=False, integrations=False, webhooks=True, invites=False, voice_states=False, presences=False,
     typing=False
 )
 
@@ -32,9 +32,7 @@ async def on_ready():
     print(bot.user)
 
 
-extensions = ['cogs.members', 'cogs.adminTools', 'cogs.devTools', 'cogs.tokens', 'cogs.characters',
-              'cogs.guilds', 'cogs.MainQuest', 'cogs.transactions', 'cogs.arena', 'cogs.twitter',
-              'cogs.slash']
+extensions = ['cogs.characters', 'cogs.owner', 'cogs.devTools']
 
 for extension in extensions:
     bot.load_extension(extension)

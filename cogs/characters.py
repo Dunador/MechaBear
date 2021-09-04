@@ -21,21 +21,28 @@ class Characters(commands.Cog):
         pass
 
     @characters.sub_command(description="Add a Playable Character",
-                            options=[Option("name", "Whats their name?", OptionType.STRING, required=True)])
-    async def add(self, inter, name=None):
+                            options=[Option("name", "Whats their name?", OptionType.STRING, required=True),
+                                     Option("handle", "For use with Peregrin_Post", OptionType.STRING),
+                                     Option("imageurl", "Image Link for Peregrine Post", OptionType.STRING),
+                                     Option("status", "alive or dead?", OptionType.STRING,
+                                            choices=[OptionChoice("alive", "alive"),
+                                                     OptionChoice("dead", "dead")]),
+                                     Option("mainquest", "Highest Main Quest completed?", OptionType.INTEGER)])
+    async def add(self, inter, name=None, handle="", status="alive", mainquest=0, imageurl=""):
         """
         Adds a Playable Character to your profile.
         """
         # checks
         # vars
-        db_entry = await db.RobBot.characters.find_one(self.f)
-        exist_pc = db_entry['characters']
+        char_doc = {"name": name.title(), "handle": f'@{handle.strip().strip("@").replace(" ", "_")}',
+                    "status": status, "mainquest": mainquest, "guilds": [], "imageurl": imageurl}
+        db_entries = db.RobBot.characters.find(self.f)
         # logic
-        for pc in exist_pc:
-            if name.title() in pc:
-                return await inter.reply(f"Sorry bud, but `{name.title()} is already in there. No duplicates allowed.")
+        async for operation in db_entries:
+            if name.title() == operation['name']:
+                return await inter.reply(f'{name.title()} already exists, no duplicates please.')
         # db actions
-        db.RobBot.characters.update_one(self.f, {'$push': {'characters': (name.title(), 'alive')}}, upsert=True)
+        await db.RobBot.characters.insert_one({**self.f, **char_doc})
         await insert_transaction(inter, 'add_pc', name, self.f)
         # Build Embed
         e = discord.Embed(title='Add Player Character',
@@ -56,25 +63,21 @@ class Characters(commands.Cog):
         """
         # checks
         # vars
-        db_entry = await db.RobBot.characters.find_one(self.f)
-        exist_pc = db_entry['characters']
-        pc_len = len(exist_pc)
+        char_count = await db.RobBot.characters.count_documents(self.f)
+        db_entries = db.RobBot.characters.find(self.f)
         menu_options = []
         # logic
-        for pc in exist_pc:
-            menu_options.append(SelectOption(pc[0].title(), pc[0]))
+        async for char in db_entries:
+            menu_options.append(SelectOption(char['name'], char['name'].lower()))
         msg = await inter.reply("Which Playable Characters are you deleting?", components=[
-            SelectMenu(custom_id="del_pc", placeholder="Choose wisely", max_values=pc_len,
+            SelectMenu(custom_id="del_pc", placeholder="Choose wisely", max_values=char_count,
                        options=menu_options)])
         inter = await msg.wait_for_dropdown()
         pc_to_del = [option.label for option in inter.select_menu.selected_options]
-        for pc in pc_to_del:
-            for pc_pair in exist_pc:
-                for ea in pc_pair:
-                    if pc in ea:
-                        exist_pc.pop(exist_pc.index(pc_pair))
         # db actions
-        db.RobBot.characters.update_one(self.f, {'$set': {'characters': exist_pc}}, upsert=True)
+        for pc in pc_to_del:
+            d = {"name": pc}
+            await db.RobBot.characters.delete_one({**self.f, **d})
         await insert_transaction(inter, 'del_pc', pc_to_del, self.f)
         # Build Embed
         e = discord.Embed(title='Delete Player Character',
@@ -96,27 +99,27 @@ class Characters(commands.Cog):
         """
         # checks
         # vars
-        db_entry = await db.RobBot.characters.find_one(self.f)
-        exist_pc = db_entry['characters']
-        pc_len = len(exist_pc)
+        char_count = await db.RobBot.characters.count_documents({**self.f, "status":"alive"})
+        db_entries = db.RobBot.characters.find({**self.f, "status":"alive"})
         menu_options = []
         # logic
-        for pc in exist_pc:
-            menu_options.append(SelectOption(pc[0].title(), pc[0]))
-        msg = await inter.reply("Which Playable Characters are you killing off?", components=[
-            SelectMenu(custom_id="kill_pc", placeholder="Choose wisely", max_values=pc_len,
+        if char_count == 1:
+            menu_options.append((SelectOption("Nevermind", "none")))
+        if char_count == 0:
+            return await inter.reply("You don't have any characters `alive`!")
+        async for char in db_entries:
+            menu_options.append(SelectOption(char['name'], char['name'].lower()))
+        msg = await inter.reply("Which Playable Characters are you killing?", components=[
+            SelectMenu(custom_id="kill_pc", placeholder="Rest in Peace", max_values=char_count,
                        options=menu_options)])
         inter = await msg.wait_for_dropdown()
         pc_to_kill = [option.label for option in inter.select_menu.selected_options]
-        for pc in pc_to_kill:
-            for pc_pair in exist_pc:
-                for ea in pc_pair:
-                    if pc in ea:
-                        exist_pc.pop(exist_pc.index(pc_pair))
-        for pc in pc_to_kill:
-            exist_pc.append([pc, 'dead'])
+        if "Nevermind" in pc_to_kill:
+            return await inter.reply("Ok. Nothing Happened.")
         # db actions
-        db.RobBot.characters.update_one(self.f, {'$set': {'characters': exist_pc}}, upsert=True)
+        for pc in pc_to_kill:
+            d = {**self.f, "name": pc}
+            db.RobBot.characters.update_one(d, {'$set': {"status": "dead"}}, upsert=True)
         await insert_transaction(inter, 'kill_pc', pc_to_kill, self.f)
         # Build Embed
         e = discord.Embed(title='Kill a Player Character',
@@ -134,37 +137,37 @@ class Characters(commands.Cog):
     @characters.sub_command(description="Revives a Playable Character")
     async def revive(self, inter):
         """
-        Revives a Playable Character from your profile
+        Revives a Playable Character from your profile, does not remove it.
         """
         # checks
         # vars
-        db_entry = await db.RobBot.characters.find_one(self.f)
-        exist_pc = db_entry['characters']
-        pc_len = len(exist_pc)
+        char_count = await db.RobBot.characters.count_documents({**self.f, "status":"dead"})
+        db_entries = db.RobBot.characters.find({**self.f, "status":"dead"})
         menu_options = []
         # logic
-        for pc in exist_pc:
-            menu_options.append(SelectOption(pc[0].title(), pc[0]))
-        msg = await inter.reply("Which Playable Characters are you Reviving", components=[
-            SelectMenu(custom_id="kill_pc", placeholder="Bring me to LIIIIFFFEEEE", max_values=pc_len,
+        if char_count == 0:
+            return await inter.reply("You don't have any characters that are `dead`!")
+        if char_count == 1:
+            menu_options.append((SelectOption("Nevermind", "none")))
+        async for char in db_entries:
+            menu_options.append(SelectOption(char['name'], char['name'].lower()))
+        msg = await inter.reply("Which Playable Characters are you reviving?", components=[
+            SelectMenu(custom_id="revive_pc", placeholder="Welcome back", max_values=char_count,
                        options=menu_options)])
         inter = await msg.wait_for_dropdown()
         pc_to_kill = [option.label for option in inter.select_menu.selected_options]
-        for pc in pc_to_kill:
-            for pc_pair in exist_pc:
-                for ea in pc_pair:
-                    if pc in ea:
-                        exist_pc.pop(exist_pc.index(pc_pair))
-        for pc in pc_to_kill:
-            exist_pc.append([pc, 'alive'])
+        if "Nevermind" in pc_to_kill:
+            return await inter.reply("Ok. Nothing Happened.")
         # db actions
-        db.RobBot.characters.update_one(self.f, {'$set': {'characters': exist_pc}}, upsert=True)
+        for pc in pc_to_kill:
+            d = {**self.f, "name": pc}
+            db.RobBot.characters.update_one(d, {'$set': {"status": "alive"}}, upsert=True)
         await insert_transaction(inter, 'revive_pc', pc_to_kill, self.f)
         # Build Embed
         e = discord.Embed(title='Revive a Player Character',
                           type='rich',
                           description=f'{inter.author.display_name}',
-                          colour=self.del_color)
+                          colour=self.add_color)
         e.set_footer(text='MechaBear v1.0')
         e.set_thumbnail(url=inter.author.avatar_url)
         # Build Embed Fields
@@ -176,21 +179,78 @@ class Characters(commands.Cog):
     @characters.sub_command(description="Views your Playable Character List")
     async def view(self, inter):
         # vars
-        t = await db.RobBot.characters.find_one(self.f)
-        # build embed
-        e = discord.Embed(title='List Player Characters',
-                          type='rich',
-                          description=f'{inter.author.display_name}',
-                          color=self.info_color)
-        e.set_footer(text='MechaBear v1.0')
-        e.set_thumbnail(url=inter.author.avatar_url)
-        if not t['characters']:
+        char_len = await db.RobBot.characters.count_documents(self.f)
+        entries = db.RobBot.characters.find(self.f)
+        # build embeds
+        if not char_len:
+            e = discord.Embed(title='List Player Characters',
+                              type='rich',
+                              description=f'{inter.author.display_name}',
+                              color=self.info_color)
+            e.set_footer(text='MechaBear v1.0')
+            e.set_thumbnail(url=inter.author.avatar_url)
             e.add_field(name='None', value='No characters found.')
         else:
-            for character in t['characters']:
-                e.add_field(name=f'{character[0]}', value=f'*{character[1].title()}*')
+            async for char in entries:
+                e = discord.Embed(title=f'{char["name"].title()}',
+                                  type='rich',
+                                  description=f'{inter.author.display_name}',
+                                  color=self.info_color)
+                e.set_footer(text='MechaBear v1.0')
+                e.set_thumbnail(url=f'{char["avatar_url"] if char.get("avatar_url") else inter.author.avatar_url}')
+                e.add_field(name='@Handle', value=char["handle"])
+                e.add_field(name='Status', value=char["status"])
+                e.add_field(name='Main Quest', value=char["mainquest"])
+                e.add_field(name='Guilds', value=char["guilds"])
         # responses
-        await inter.reply(embed=e, delete_after=90)
+                await inter.reply(embed=e, delete_after=90)
+
+    @characters.sub_command(description="Peregrine Post Setup")
+    async def post_setup(self, inter):
+        # checks
+        def workflow_m_check(m):
+            if m.author.id == inter.author.id:
+                return True
+        # vars
+        char_count = await db.RobBot.characters.count_documents(self.f)
+        db_entries = db.RobBot.characters.find(self.f)
+        menu_options = []
+        # logic
+        if not char_count:
+            await inter.reply("You have no characters!")
+        if char_count == 1:
+            menu_options.append((SelectOption("Nevermind", "none")))
+        async for char in db_entries:
+            menu_options.append(SelectOption(char['name'], char['name'].lower()))
+        msg = await inter.reply("Set up Peregrine Post for which character?", components=[
+            SelectMenu(custom_id="post_setup", placeholder="@Peregrine-Post", max_values=1,
+                       options=menu_options)])
+        inter = await msg.wait_for_dropdown()
+        char = [option.label for option in inter.select_menu.selected_options][0]
+        await inter.reply("Enter in the handle you want. Example: `my twitter handle`")
+        handle = await client.wait_for('message', check=workflow_m_check, timeout=30)
+        await inter.reply("Enter in the url for your Peregrine Post image")
+        imageurl = await client.wait_for('message', check=workflow_m_check, timeout=30)
+        handle = f'@{handle.content.strip().strip("@").replace(" ", "_")}'
+
+        # db actions
+        f = {**self.f, "name": char}
+        c = {"handle": handle, "imageurl":imageurl.content}
+        await db.RobBot.characters.update_one(f, {"$set": c}, upsert=True)
+        await insert_transaction(inter, 'post_setup', c, self.f)
+        # build embeds
+        e = discord.Embed(title='Peregrine Post Setup',
+                          type='rich',
+                          description=f'{char}',
+                          colour=self.info_color)
+        e.set_footer(text='MechaBear v1.0')
+        e.set_thumbnail(url=imageurl.content)
+        e.add_field(name="Handle", value=handle)
+        e.add_field(name="How-To", value=f'You can now type @ and then part of name of your character, ending it in @, '
+                                         f'with your tweet inbetween.\n\nExample: `@{char.split()[0].lower()} '
+                                         f'This is my Tweet!@` and it will post on the proper channel.')
+        await inter.reply(embed=e)
+
 
 def setup(bot):
     bot.add_cog(Characters(bot))

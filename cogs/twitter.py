@@ -15,24 +15,24 @@ class TwitterCommands(commands.Cog, name='Peregrine'):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.Cog.listener("on_message")
-    async def on_message(self, message):
-        # check to see if the triggers are there
-        #
-        f = {'member_id': str(message.author.id), 'server_id': str(message.author.guild.id)}
-        if message.content.startswith("@@"):
-            # get the raw message to repeat
-            message = message.content.replace("@","")
-            # setup the channel to send to, change this later
-            channel = client.get_channel(875590006192893982)
-
-            # get the info from the database
-            settings = await db.RobBot.peregrine.find_one(f)
-            print(settings)
-            #setup the webhook at that channel
-            webhook = await channel.create_webhook(name=settings['name'])
-            await webhook.send(message, avatar_url=settings['url'])
-            await webhook.delete()
+    # @commands.Cog.listener("on_message")
+    # async def on_message(self, message):
+    #     # check to see if the triggers are there
+    #     #
+    #     f = {'member_id': str(message.author.id), 'server_id': str(message.author.guild.id)}
+    #     if message.content.startswith("@@"):
+    #         # get the raw message to repeat
+    #         message = message.content.replace("@","")
+    #         # setup the channel to send to, change this later
+    #         channel = client.get_channel(875590006192893982)
+    #
+    #         # get the info from the database
+    #         settings = await db.RobBot.peregrine.find_one(f)
+    #         print(settings)
+    #         #setup the webhook at that channel
+    #         webhook = await channel.create_webhook(name=settings['name'])
+    #         await webhook.send(message, avatar_url=settings['url'])
+    #         await webhook.delete()
 
         # if "ice" in message.content.lower():
         #     webhook = await message.channel.create_webhook(name='IceBear(real)')

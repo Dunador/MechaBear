@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
-from utils.helpers import m_search
-import utils.checks as checks
+import utils.checks as bot_checks
 
 
 class DevCommands(commands.Cog, name='Developer', command_attrs=dict(hidden=True)):
@@ -10,12 +9,7 @@ class DevCommands(commands.Cog, name='Developer', command_attrs=dict(hidden=True
     def __init__(self, bot):
         self.bot = bot
 
-    async def cog_check(self, ctx):
-        """
-        The default check for this cog whenever a command is used. Returns True if the command is allowed.
-        """
-        return ctx.author.id == self.bot.author_id
-
+    @bot_checks.is_admin()
     @commands.command(name='reload', aliases=['rl'])
     async def reload(self, ctx, cog):
         """
@@ -35,6 +29,7 @@ class DevCommands(commands.Cog, name='Developer', command_attrs=dict(hidden=True
         else:
             await ctx.send('Unknown Cog')  # If the cog isn't found/loaded.
 
+    @bot_checks.is_admin()
     @commands.command(name="unload", aliases=['ul'])
     async def unload(self, ctx, cog):
         """
@@ -48,6 +43,7 @@ class DevCommands(commands.Cog, name='Developer', command_attrs=dict(hidden=True
         self.bot.unload_extension(cog)
         await ctx.send(f"`{cog}` has successfully been unloaded.")
 
+    @bot_checks.is_admin()
     @commands.command(name="load")
     async def load(self, ctx, cog):
         """
@@ -62,6 +58,7 @@ class DevCommands(commands.Cog, name='Developer', command_attrs=dict(hidden=True
         except commands.errors.ExtensionNotFound:
             await ctx.send(f"`{cog}` does not exist!")
 
+    @bot_checks.is_admin()
     @commands.command(name="listcogs", aliases=['lc'])
     async def listcogs(self, ctx):
         """
@@ -73,24 +70,7 @@ class DevCommands(commands.Cog, name='Developer', command_attrs=dict(hidden=True
         base_string += "\n```"
         await ctx.send(base_string)
 
-    @commands.command(name="tembed")
-    async def tembed(self, ctx):
-        """
-        TEST EMBEDS
-        """
-        test_embed = discord.Embed(title='Test Embed Title',
-                                   type='rich',
-                                   description='The description of the Embed')
-        test_embed.set_footer(text='This is a test footer')
-        test_embed.add_field(name=f'{ctx.author.display_name}',
-                             value=f'You have been here since {ctx.author.joined_at}',
-                             inline=True)
-        test_embed.add_field(name=f'{ctx.author.id}',
-                             value=f'Your top role is {ctx.author.top_role}',
-                             inline=True)
-        await ctx.send(embed=test_embed)
-
-    @checks.is_admin()
+    @bot_checks.is_admin()
     @commands.command(name='say')
     async def say(self, ctx, *msg):
         await ctx.message.delete()

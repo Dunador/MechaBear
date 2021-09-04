@@ -1,5 +1,5 @@
 import discord
-from main import bot as client, db
+from main import bot as client
 from re import search, IGNORECASE
 from datetime import datetime
 

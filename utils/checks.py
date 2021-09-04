@@ -1,14 +1,15 @@
 from discord.ext import commands
+import bot_config
 
 
 def is_owner():
     async def predicate(ctx):
-        author_id = ctx.bot.author_id
-        if ctx.author.id == author_id:
+        if str(ctx.author.id) == bot_config.BOT_AUTHOR_ID:
+            return True
+        elif "Admin" in [role.name for role in ctx.author.roles]:
             return True
         else:
-            await ctx.send("Only the Bot owner can do this.")
-
+            ctx.send("You are not the Owner of this bot, I DONT KNOW YOU!")
     return commands.check(predicate)
 
 
@@ -20,9 +21,8 @@ def is_admin():
         for role in ctx.author.roles:
             if role.name in admin_roles:
                 return True
-        else:
-            await ctx.send("You are not an admin")
-
+        await ctx.send("You are not an admin")
+        return False
     return commands.check(predicate)
 
 
