@@ -3,6 +3,7 @@ from discord.ext import commands
 import utils.checks as bot_checks
 from dislash import slash_command,user_command, ContextMenuInteraction
 from main import db
+from datetime import datetime
 
 
 class OwnerCommands(commands.Cog, name='Owner'):
@@ -27,8 +28,10 @@ class OwnerCommands(commands.Cog, name='Owner'):
     async def give_token(self, inter: ContextMenuInteraction):
         f = {'member_id': str(inter.user.id), 'server_id': str(inter.guild.id)}
         member = await db.RobBot.members.find_one(f)
+        # db actions
         db.RobBot.members.update_one(f, {"$inc": {"tokens": 1}})
-        #await insert_transaction(inter,'give_token', "1", self.f)
+        t = {'exec_by': str(inter.author.id), 'transaction': 'give_token', 'data': 1, 'timestamp': datetime.utcnow()}
+        await db.RobBot.transactions.insert_one({**t, **f})
         # Build Embed
         e = discord.Embed(title='Give Token',
                           type='rich',

@@ -1,7 +1,8 @@
 from discord.ext import commands
 from utils.helpers import *
 from dislash import *
-
+from main import db, bot as client
+from datetime import datetime
 
 class Characters(commands.Cog):
     """
@@ -43,14 +44,15 @@ class Characters(commands.Cog):
                 return await inter.reply(f'{name.title()} already exists, no duplicates please.')
         # db actions
         await db.RobBot.characters.insert_one({**self.f, **char_doc})
-        await insert_transaction(inter, 'add_pc', name, self.f)
+        t = {'exec_by': str(inter.author.id), 'transaction': 'add_pc', 'data': char_doc, 'timestamp': datetime.utcnow()}
+        await db.RobBot.transactions.insert_one({**t, **self.f})
         # Build Embed
         e = discord.Embed(title='Add Player Character',
                           type='rich',
                           description=f'{inter.author.display_name}',
                           colour=self.add_color)
         e.set_footer(text='MechaBear v1.0')
-        e.set_thumbnail(url=inter.author.avatar_url)
+        e.set_thumbnail(url=inter.author.avatar_url if imageurl == "" else imageurl)
         # Build Embed Fields
         e.add_field(name=f'{name.title()}', value=f'Added to list')
         # responses
@@ -78,7 +80,8 @@ class Characters(commands.Cog):
         for pc in pc_to_del:
             d = {"name": pc}
             await db.RobBot.characters.delete_one({**self.f, **d})
-        await insert_transaction(inter, 'del_pc', pc_to_del, self.f)
+        t = {'exec_by': str(inter.author.id), 'transaction': 'del_pc', 'data': pc_to_del, 'timestamp': datetime.utcnow()}
+        await db.RobBot.transactions.insert_one({**t, **self.f})
         # Build Embed
         e = discord.Embed(title='Delete Player Character',
                           type='rich',
@@ -120,7 +123,8 @@ class Characters(commands.Cog):
         for pc in pc_to_kill:
             d = {**self.f, "name": pc}
             db.RobBot.characters.update_one(d, {'$set': {"status": "dead"}}, upsert=True)
-        await insert_transaction(inter, 'kill_pc', pc_to_kill, self.f)
+        t = {'exec_by': str(inter.author.id), 'transaction': 'kill_pc', 'data':pc_to_kill, 'timestamp': datetime.utcnow()}
+        await db.RobBot.transactions.insert_one({**t, **self.f})
         # Build Embed
         e = discord.Embed(title='Kill a Player Character',
                           type='rich',
@@ -162,7 +166,8 @@ class Characters(commands.Cog):
         for pc in pc_to_kill:
             d = {**self.f, "name": pc}
             db.RobBot.characters.update_one(d, {'$set': {"status": "alive"}}, upsert=True)
-        await insert_transaction(inter, 'revive_pc', pc_to_kill, self.f)
+        t = {'exec_by': str(inter.author.id), 'transaction': 'revive_pc', 'data': pc_to_kill, 'timestamp': datetime.utcnow()}
+        await db.RobBot.transactions.insert_one({**t, **self.f})
         # Build Embed
         e = discord.Embed(title='Revive a Player Character',
                           type='rich',
@@ -197,7 +202,7 @@ class Characters(commands.Cog):
                                   description=f'{inter.author.display_name}',
                                   color=self.info_color)
                 e.set_footer(text='MechaBear v1.0')
-                e.set_thumbnail(url=f'{char["avatar_url"] if char.get("avatar_url") else inter.author.avatar_url}')
+                e.set_thumbnail(url=f'{char["imageurl"] if char.get("imageurl") else inter.author.avatar_url}')
                 e.add_field(name='@Handle', value=char["handle"])
                 e.add_field(name='Status', value=char["status"])
                 e.add_field(name='Main Quest', value=char["mainquest"])
@@ -237,7 +242,8 @@ class Characters(commands.Cog):
         f = {**self.f, "name": char}
         c = {"handle": handle, "imageurl":imageurl.content}
         await db.RobBot.characters.update_one(f, {"$set": c}, upsert=True)
-        await insert_transaction(inter, 'post_setup', c, self.f)
+        t = {'exec_by': str(inter.author.id), 'transaction': 'setup_psot', 'data': c, 'timestamp': datetime.utcnow()}
+        await db.RobBot.transactions.insert_one({**t, **self.f})
         # build embeds
         e = discord.Embed(title='Peregrine Post Setup',
                           type='rich',
@@ -246,9 +252,7 @@ class Characters(commands.Cog):
         e.set_footer(text='MechaBear v1.0')
         e.set_thumbnail(url=imageurl.content)
         e.add_field(name="Handle", value=handle)
-        e.add_field(name="How-To", value=f'You can now type @ and then part of name of your character, ending it in @, '
-                                         f'with your tweet inbetween.\n\nExample: `@{char.split()[0].lower()} '
-                                         f'This is my Tweet!@` and it will post on the proper channel.')
+        e.add_field(name="How-To", value=f'You can now send to peregrine post Use `/peregrine`')
         await inter.reply(embed=e)
 
 
