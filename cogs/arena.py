@@ -5,6 +5,7 @@ from utils.pipelines import profile_pipeline, mod_pipeline
 from utils.helpers import *
 from datetime import datetime
 from dislash import *
+from pymongo import DESCENDING
 
 class ArenaCommands(commands.Cog, name='Arena Commands'):
     """
@@ -23,38 +24,125 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
         self.f = {'member_id': str(inter.author.id), 'server_id': str(inter.guild.id)}
         pass
 
+    @checks.is_dm()
     @arena.sub_command(description="Adds a Fight Record",
                        options=[Option("member", "Who is the Member? (The owner of the character)", OptionType.USER, required=True)])
     async def fight(self, inter, member):
         #vars
-        f = {'member_id':str(member.id), 'guild_id':str(inter.guild.id)}
+        f = {'member_id':str(member.id), 'server_id':str(inter.guild.id)}
+        char_count = await db.RobBot.characters.count_documents(f)
         char_entries = db.RobBot.characters.find(f)
-        beast_entries = db.RobBot.beasts.find()
         char_row = ActionRow()
-        beast_row = ActionRow()
+        if char_count == 0:
+            return await inter.reply("That Member does not have Characters set up. run `/character add`")
         async for char in char_entries:
-            char_row.add_button(style=ButtonStyle.green, label=char["name"], custom_id=char["name"].lower())
-        async for beast in beast_entries:
-            beast_row.add_button(style=ButtonStyle.gray, label=beast["name"], custom_id=beast["name"].lower())
+            char_row.add_button(style=ButtonStyle.green, label=char["name"], custom_id=char["imageurl"])
+        char_msg = await inter.reply("Which Player Character fought?", components=[char_row])
+        on_click = char_msg.create_click_listener(timeout=60)
+        @on_click.no_checks()
+        async def chose_character(char_inter):
+            f.update({"character_name": char_inter.component.label})
+            await char_msg.delete()
+
+            beast_entries = db.RobBot.beasts.find()
+            beast_row = ActionRow()
+            async for beast in beast_entries:
+               beast_row.add_button(style=ButtonStyle.gray, label=beast["name"], custom_id=beast["name"].lower())
+            beast_msg = await inter.reply("Which Beast?", components=[beast_row])
+            on_click = beast_msg.create_click_listener(timeout=60)
+            @on_click.no_checks()
+            async def chose_beast(beast_inter):
+                f.update({"beast_name": beast_inter.component.label})
+                await beast_msg.delete()
+                outcome_row = ActionRow()
+                outcome_row.add_button(style=ButtonStyle.success, label="Win")
+                outcome_row.add_button(style=ButtonStyle.danger, label="Loss")
+                outcome_msg = await inter.reply("Outcome?", components=[outcome_row])
+                on_click = outcome_msg.create_click_listener(timeout=60)
+                @on_click.no_checks()
+                async def chose_outcome(outcome_inter):
+                    f.update({"outcome": outcome_inter.component.label})
+                    await outcome_msg.delete()
+                    await db.RobBot.arena.insert_one(f)
+                    e = discord.Embed(title='Add a Fight Record',
+                                      type='rich',
+                                      description=f'`{f["character_name"]}` fought `{f["beast_name"]}` and resulted in a `{f["outcome"]}`',
+                                      colour=self.del_color if f["outcome"] == "Loss" else self.add_color)
+                    e.set_footer(text='MechaBear v1.0')
+                    e.set_thumbnail(url=char_inter.component.custom_id)
+                    return await inter.reply(embed=e)
+
+    @checks.is_dm()
+    @arena.sub_command(description="Adds a Beast",
+                           options=[Option("name", "Whats the name of the beast?", OptionType.STRING,
+                                           required=True)])
+    async def add_beast(self, inter, name):
+        beast_entries = db.RobBot.beasts.find()
+        existing_beasts = [beast["name"] async for beast in beast_entries]
+        if name.title() in existing_beasts:
+            return await inter.reply("Already exists.")
+        beast = {"name":name.title()}
+        await db.RobBot.beasts.insert_one({**self.f, **beast})
+        return await inter.reply(f'{name.title()} added to the DB')
+
+    @arena.sub_command(description="Shows a Playable Characters Fight Record",
+                       options=[Option("member", "Who is the Member? (The owner of the character)", OptionType.USER,
+                                       required=True)])
+    async def record(self, inter, member):
+        # vars
+        f = {'member_id': str(member.id), 'server_id': str(inter.guild.id)}
+        char_count = await db.RobBot.characters.count_documents(f)
+        char_entries = db.RobBot.characters.find(f)
+        char_row = ActionRow()
+        if char_count == 0:
+            return await inter.reply("That Member does not have Characters set up. run `/character add`")
+        async for char in char_entries:
+            char_row.add_button(style=ButtonStyle.green, label=char["name"], custom_id=char["imageurl"])
         char_msg = await inter.reply("Which Player Character fought?", components=[char_row])
         on_click = char_msg.create_click_listener(timeout=60)
 
         @on_click.no_checks()
         async def chose_character(char_inter):
             f.update({"character_name": char_inter.component.label})
+            await char_msg.delete()
+            fight_count = db.RobBot.arena.count_documents(f)
+            if not fight_count:
+                return await inter.reply("Member has no Playable Characters set up.")
+            fight_list = db.RobBot.arena.find(f).sort('_id', DESCENDING)
+            e = discord.Embed(title='Fight Record',
+                              type='rich',
+                              description=f'Viewing Fight Record for `{char_inter.component.label}`',
+                              colour=self.info_color)
+            e.set_footer(text='MechaBear v1.0')
+            e.set_thumbnail(url=char_inter.component.custom_id)
+            async for fight in fight_list:
+                e.add_field(name=f'{fight["_id"].generation_time.date()}', value=f'vs `{fight["beast_name"]}`\n\n***{fight["outcome"]}***')
+            await inter.reply(embed=e)
 
-        beast_msg = await inter.reply("Which Beast?", components=[beast_row])
+    @arena.sub_command(description="Shows a Beast's Fight Record")
+    async def beast_record(self, inter):
+        # vars
+        beasts = db.RobBot.beasts.find()
+        beast_row = ActionRow()
+        async for beast in beasts:
+            beast_row.add_button(style=ButtonStyle.grey, label=f'{beast["name"]}')
+        beast_msg = await inter.reply("Check Records for which Beast?", components=[beast_row])
         on_click = beast_msg.create_click_listener(timeout=60)
 
         @on_click.no_checks()
         async def chose_beast(beast_inter):
-            f.update({"beast_name": beast_inter.component.label})
-
-        outcome_msg = await inter.reply("Outcome?", components=[
-            ActionRow(Button(style=ButtonStyle.success, label="Win", custom_id="win"),
-                      Button(style=ButtonStyle.danger, label="Loss", custom_id="loss"),
-                      Button)
-        ])
+            await beast_msg.delete()
+            fight_list = db.RobBot.arena.find({"beast_name": beast_inter.component.label}).sort('_id', DESCENDING)
+            e = discord.Embed(title='Fight Record',
+                              type='rich',
+                              description=f'Viewing Fight Record for `{beast_inter.component.label}`',
+                              colour=self.info_color)
+            e.set_footer(text='MechaBear v1.0')
+            e.set_thumbnail(url=inter.author.avatar_url)
+            async for fight in fight_list:
+                e.add_field(name=f'{fight["_id"].generation_time.date()}',
+                            value=f'vs `{fight["character_name"]}`\n\n***Character {fight["outcome"]}***')
+            await inter.reply(embed=e)
 
 
 
