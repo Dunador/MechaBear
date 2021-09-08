@@ -57,6 +57,7 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
                 outcome_row = ActionRow()
                 outcome_row.add_button(style=ButtonStyle.success, label="Win")
                 outcome_row.add_button(style=ButtonStyle.danger, label="Loss")
+                outcome_row.add_button(style=ButtonStyle.grey, label="Tie")
                 outcome_msg = await inter.reply("Outcome?", components=[outcome_row])
                 on_click = outcome_msg.create_click_listener(timeout=60)
                 @on_click.no_checks()
@@ -229,7 +230,7 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
     #
     #     await ctx.send(embed=e, delete_after=90)
 
-#TODO. do checks for Win, Loss, Tie
+
 
 
 def setup(bot):

@@ -101,8 +101,5 @@ class TwitterCommands(commands.Cog, name='Peregrine'):
         await ctx.send('Setup Complete. use @ text @')
 
 
-# TODO: The plan is to have a listener for @, and have a list of which ones belong to who. then post to peregrine post
-
-
 def setup(bot):
     bot.add_cog(TwitterCommands(bot))

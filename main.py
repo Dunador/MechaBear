@@ -32,7 +32,8 @@ async def on_ready():
     print(bot.user)
 
 
-extensions = ['cogs.characters', 'cogs.owner', 'cogs.devTools', 'cogs.twitter', 'cogs.arena']
+extensions = ['cogs.characters', 'cogs.owner', 'cogs.devTools', 'cogs.twitter', 'cogs.arena', 'cogs.help',
+              'cogs.highlights']
 
 for extension in extensions:
     bot.load_extension(extension)
