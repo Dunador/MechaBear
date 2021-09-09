@@ -19,7 +19,7 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
         self.info_color = discord.Colour.orange()
         self.f = {}
 
-    @slash_command(Description='Arena Commands')
+    @slash_command(description='Arena Commands')
     async def arena(self, inter):
         self.f = {'member_id': str(inter.author.id), 'server_id': str(inter.guild.id)}
         pass
@@ -65,6 +65,9 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
                     f.update({"outcome": outcome_inter.component.label})
                     await outcome_msg.delete()
                     await db.RobBot.arena.insert_one(f)
+                    t = {'exec_by': str(inter.author.id), 'transaction': 'add_fight', 'data': f,
+                         'timestamp': datetime.utcnow()}
+                    await db.RobBot.transactions.insert_one({**t, **f})
                     e = discord.Embed(title='Add a Fight Record',
                                       type='rich',
                                       description=f'`{f["character_name"]}` fought `{f["beast_name"]}` and resulted in a `{f["outcome"]}`',
@@ -83,7 +86,11 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
         if name.title() in existing_beasts:
             return await inter.reply("Already exists.")
         beast = {"name":name.title()}
+        # db insert
         await db.RobBot.beasts.insert_one({**self.f, **beast})
+        t = {'exec_by': str(inter.author.id), 'transaction': 'add_beast', 'data': name,
+             'timestamp': datetime.utcnow()}
+        await db.RobBot.transactions.insert_one({**t, **self.f})
         return await inter.reply(f'{name.title()} added to the DB')
 
     @arena.sub_command(description="Shows a Playable Characters Fight Record",
