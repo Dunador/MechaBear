@@ -1,4 +1,4 @@
-#MechaBear
+# MechaBear
 
 ## A bot for Dungeons of Desternia
 
@@ -34,7 +34,37 @@ If a member did not opt to configure the "Twitter-like" Peregerine Post, they ca
 [ ] add `/characters lookup` command for other Members to look up information on Playable Characters
 
 ---
+### DM Module
+- [ ] TODO: everything in this module
 
+This group of commands will have commands specific to DMs running quests
+
+`/dm new_quest`
+
+Pass a Name of the quest and its members. It will create 
+1. A temporary category `> My Quest`
+2. Three Channels 
+   1. `# rp-my-quest` for the RP of the quest, to include Avrae, Rodbot, Celene, and Tupper
+   2. `# ooc-my-quest` for the out-of-character and rolls
+   3. `# dm-my-quest` for the DM to do his thing
+3. It will add a tag `@my-quest` to the players passed in the command and give them permissions to the first 2 channels
+
+`/dm complete_quest`
+
+Once the quest is complete, run this command to do the following
+
+1. Remove the player `@my-quest` tags
+2. Archive or delete the `> My Quest` category and all its channels
+3. Ask for a synopsis of what happened
+4. Add a record entry into the DM profile
+5. Add a record entry into all the players profiles
+6. If it was a guild quest, add a record entry into the Guilds profile
+
+`/dm quest_players`
+
+Used to add / remove players to the quest
+
+---
 ### Guilds Module
 
 Guild's Module has commands to help Guild Masters manage the administrative portion of their guilds.
