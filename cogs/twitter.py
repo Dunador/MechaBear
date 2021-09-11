@@ -24,7 +24,7 @@ class TwitterCommands(commands.Cog, name='Peregrine'):
     async def peregrine(self, inter, post):
         # vars
         f = {'member_id': str(inter.author.id), 'server_id': str(inter.guild.id)}
-        db_entries = db.RobBot.characters.find({**self.f, "status": "alive"})
+        db_entries = db.RobBot.characters.find({**f, "status": "alive"})
         channel = client.get_channel(875590006192893982)
         webhooks = await channel.webhooks()
         char_row = ActionRow()

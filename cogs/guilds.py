@@ -52,6 +52,21 @@ class GuildCommands(commands.Cog, name='Guild Commands'):
         e.add_field(name=name.title(), value="Added to the Server")
         return await inter.reply(embed=e)
 
+    @guild.sub_command(description="Add a member to an existing Guild",
+                       options=[
+                           Option("member", "What member are you adding to a guild?",
+                                  OptionType.USER, required=True)
+                       ])
+    async def add_member(self, inter, member):
+        # load guilds on the server
+        guild_list = db.RobBot.guilds.find()
+        guilds_menu = SelectMenu(custom_id="guild_list", placeholder="Guilds", max_values=1)
+        async for guild in guild_list:
+            guilds_menu.add_option(label=guild["name"], value=guild["name"].lower())
+        msg = await inter.reply("")
+
+
+
     # @commands.command(name='add_guild')
     # async def add_guild(self, ctx, member, *guilds):
     #     """

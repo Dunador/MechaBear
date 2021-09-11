@@ -36,7 +36,7 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
         if char_count == 0:
             return await inter.reply("That Member does not have Characters set up. run `/character add`")
         async for char in char_entries:
-            char_row.add_button(style=ButtonStyle.green, label=char["name"], custom_id=char["imageurl"])
+            char_row.add_button(style=ButtonStyle.green, label=char["name"], custom_id=char["name"].lower() )
         char_msg = await inter.reply("Which Player Character fought?", components=[char_row])
         on_click = char_msg.create_click_listener(timeout=60)
         @on_click.no_checks()
@@ -73,7 +73,7 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
                                       description=f'`{f["character_name"]}` fought `{f["beast_name"]}` and resulted in a `{f["outcome"]}`',
                                       colour=self.del_color if f["outcome"] == "Loss" else self.add_color)
                     e.set_footer(text='MechaBear v1.0')
-                    e.set_thumbnail(url=char_inter.component.custom_id)
+                    # e.set_thumbnail(url=char_inter.component.custom_id)
                     return await inter.reply(embed=e)
 
     @checks.is_dm()
@@ -105,7 +105,7 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
         if char_count == 0:
             return await inter.reply("That Member does not have Characters set up. run `/character add`")
         async for char in char_entries:
-            char_row.add_button(style=ButtonStyle.green, label=char["name"], custom_id=char["imageurl"])
+            char_row.add_button(style=ButtonStyle.green, label=char["name"], custom_id=char["name"].lower())
         char_msg = await inter.reply("Which Player Character fought?", components=[char_row])
         on_click = char_msg.create_click_listener(timeout=60)
 
@@ -122,7 +122,7 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
                               description=f'Viewing Fight Record for `{char_inter.component.label}`',
                               colour=self.info_color)
             e.set_footer(text='MechaBear v1.0')
-            e.set_thumbnail(url=char_inter.component.custom_id)
+            # e.set_thumbnail(url=char_inter.component.custom_id)
             async for fight in fight_list:
                 e.add_field(name=f'{fight["_id"].generation_time.date()}', value=f'vs `{fight["beast_name"]}`\n\n***{fight["outcome"]}***')
             await inter.reply(embed=e)
