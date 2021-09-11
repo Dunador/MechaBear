@@ -1,3 +1,4 @@
 discord
-keep_alive
-json
+dislash
+pymongo[srv]
+motor
