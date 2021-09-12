@@ -36,4 +36,12 @@ def is_dm():
     return commands.check(predicate)
 
 
+def is_guild_master():
+    async def predicate(ctx):
+        for role in ctx.author.roles:
+            if role.name == "Guild Master":
+                return True
+        else:
+            await ctx.send("You are not a Guild Master")
+    return commands.check(predicate)
 

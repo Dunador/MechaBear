@@ -33,7 +33,7 @@ async def on_ready():
 
 
 extensions = ['cogs.characters', 'cogs.owner', 'cogs.devTools', 'cogs.twitter', 'cogs.arena', 'cogs.help',
-              'cogs.highlights', 'cogs.guilds', 'cogs.slash']
+              'cogs.highlights', 'cogs.guilds', 'cogs.slash', 'cogs.tasks', 'cogs.todos']
 
 for extension in extensions:
     bot.load_extension(extension)
@@ -41,6 +41,6 @@ for extension in extensions:
 token = config.TOKEN
 bot.run(token)
 
-# TODO: add a way to add Crafters Certification
-# TODO: connect names of characters to levels so that you can build your name
+
+
 # TODO: Role Sign-up, # Welcome Questionnaire # Character Submission # VSheet Application # Quest Tag —> Role-sign-up

@@ -5,6 +5,7 @@ from utils.pagination import Element
 import asyncio
 from main import bot as client
 
+
 class HighlightsCommands(commands.Cog, name='Highlights Commands'):
 
     def __init__(self, bot):
@@ -42,6 +43,7 @@ class HighlightsCommands(commands.Cog, name='Highlights Commands'):
             e.set_image(url=inter.message.attachments[0].url)
             await webhook.send(embed=e, avatar_url='https://i.imgur.com/rFujonc.jpg')
         return await inter.reply("Message sent to the Highlight Reel", ephemeral=True)
+
 
 def setup(bot):
     bot.add_cog(HighlightsCommands(bot))

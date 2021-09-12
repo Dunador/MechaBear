@@ -98,9 +98,13 @@ Using the twitter like feature, where a character posts to a channel for status 
 
 These command groups are for DMs to keep track of arena fights with beasts. 
 
-*DM ONLY* `/arena fight`
+*DM ONLY* `/arena beast_fight`
 
 Logs in a fight from a playable character and a beast
+
+*DM ONLY* `/arena pvp_fight`
+
+Logs in a fight between two playable characters
 
 *DM ONLY* `/arena add_beast`
 

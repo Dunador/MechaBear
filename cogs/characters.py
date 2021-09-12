@@ -3,6 +3,8 @@ from utils.helpers import *
 from dislash import *
 from main import db, bot as client
 from datetime import datetime
+from utils.menu_options import *
+
 
 class Characters(commands.Cog):
     """
@@ -22,13 +24,7 @@ class Characters(commands.Cog):
         pass
 
     @characters.sub_command(description="Add a Playable Character",
-                            options=[Option("name", "Whats their name?", OptionType.STRING, required=True),
-                                     Option("handle", "For use with Peregrin_Post", OptionType.STRING),
-                                     Option("imageurl", "Image Link for Peregrine Post", OptionType.STRING),
-                                     Option("status", "alive or dead?", OptionType.STRING,
-                                            choices=[OptionChoice("alive", "alive"),
-                                                     OptionChoice("dead", "dead")]),
-                                     Option("mainquest", "Highest Main Quest completed?", OptionType.INTEGER)])
+                            options= CHAR_ADD)
     async def add(self, inter, name=None, handle="", status="alive", mainquest=0, imageurl=""):
         """
         Adds a Playable Character to your profile.

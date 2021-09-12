@@ -7,6 +7,7 @@ from datetime import datetime
 from dislash import *
 from pymongo import DESCENDING
 
+
 class ArenaCommands(commands.Cog, name='Arena Commands'):
     """
   Commands for the Arena
@@ -25,9 +26,9 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
         pass
 
     @checks.is_dm()
-    @arena.sub_command(description="Adds a Fight Record",
+    @arena.sub_command(description="Adds a Beast Fight Record",
                        options=[Option("member", "Who is the Member? (The owner of the character)", OptionType.USER, required=True)])
-    async def fight(self, inter, member):
+    async def fight_beast(self, inter, member):
         #vars
         f = {'member_id':str(member.id), 'server_id':str(inter.guild.id)}
         char_count = await db.RobBot.characters.count_documents(f)
@@ -75,6 +76,73 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
                     e.set_footer(text='MechaBear v1.0')
                     # e.set_thumbnail(url=char_inter.component.custom_id)
                     return await inter.reply(embed=e)
+
+    @checks.is_dm()
+    @arena.sub_command(description="Adds a PvP Fight Record",
+                       options=[Option("member1", "Who is the Member? (The owner of the first character)", OptionType.USER, required=True),
+                                Option("member2", "Who is the other Member? (The owner of the second character)", OptionType.USER, required=True)])
+    async def fight_pvp(self, inter, member1, member2):
+        #vars
+        f = {'member_id':str(member1.id), 'server_id':str(inter.guild.id)}
+        g = {'member_id':str(member2.id), 'server_id':str(inter.guild.id)}
+        char1_count = await db.RobBot.characters.count_documents(f)
+        char2_count = await db.RobBot.characters.count_documents(f)
+        char1_entries = db.RobBot.characters.find(f)
+        char2_entries = db.RobBot.characters.find(g)
+        char1_row = ActionRow()
+        char2_row = ActionRow()
+
+        if char1_count == 0:
+            return await inter.reply(f'{member1.display_name} does not have Characters set up. run `/character add`')
+        async for char in char1_entries:
+            char1_row.add_button(style=ButtonStyle.green, label=char["name"], custom_id=char["name"].lower())
+        if char2_count == 0:
+            return await inter.reply(f"{member2.display_name} does not have Characters set up. run `/character add`")
+        async for char in char2_entries:
+            char2_row.add_button(style=ButtonStyle.green, label=char["name"], custom_id=char["name"].lower())
+
+        char1_msg = await inter.reply("First Player Character that fought?", components=[char1_row])
+        on_click = char1_msg.create_click_listener(timeout=60)
+        @on_click.no_checks()
+        async def chose_character1(char1_inter):
+            f.update({"character_name": char1_inter.component.label})
+            await char1_msg.delete()
+
+            char2_msg = await inter.reply("Second Player Character that fought?", components=[char2_row])
+            on_click = char2_msg.create_click_listener(timeout=60)
+
+            @on_click.no_checks()
+            async def chose_character2(char2_inter):
+                g.update({"character_name": char2_inter.component.label})
+                await char2_msg.delete()
+
+                outcome_row = ActionRow()
+                outcome_row.add_button(style=ButtonStyle.success, label="Win")
+                outcome_row.add_button(style=ButtonStyle.danger, label="Loss")
+                outcome_row.add_button(style=ButtonStyle.grey, label="Tie")
+                outcome_msg = await inter.reply("Outcome?", components=[outcome_row])
+                on_click = outcome_msg.create_click_listener(timeout=60)
+                @on_click.no_checks()
+                async def chose_outcome(outcome_inter):
+                    f.update({"outcome": outcome_inter.component.label, "beast_name": char2_inter.component.label})
+                    g.update({"outcome": "Tie" if outcome_inter.component.label == "Tie" else "Loss" if outcome_inter.component.label == "Win" else "Win", "beast_name": char1_inter.component.label})
+
+                    await outcome_msg.delete()
+                    # add both outcomes to each character
+                    # character1
+                    await db.RobBot.arena.insert_one(g)
+                    await db.RobBot.arena.insert_one(f)
+                    t = {'exec_by': str(inter.author.id), 'transaction': 'add_pvp', 'data': [f,g],
+                         'timestamp': datetime.utcnow()}
+                    await db.RobBot.transactions.insert_one({**t, **f})
+                    e = discord.Embed(title='Add a PvP Fight Record',
+                                      type='rich',
+                                      description=f'`{f["character_name"]}` fought `{g["character_name"]}` and resulted in a `{f["outcome"]}` for {f["character_name"]}',
+                                      colour=self.del_color if f["outcome"] == "Loss" else self.add_color)
+                    e.set_footer(text='MechaBear v1.0')
+                    # e.set_thumbnail(url=char_inter.component.custom_id)
+                    return await inter.reply(embed=e)
+
 
     @checks.is_dm()
     @arena.sub_command(description="Adds a Beast",
@@ -151,93 +219,6 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
                 e.add_field(name=f'{fight["_id"].generation_time.date()}',
                             value=f'vs `{fight["character_name"]}`\n\n***Character {fight["outcome"]}***')
             await inter.reply(embed=e)
-
-
-
-        # check for which pc
-
-    #     await ctx.message.delete()
-    #     if outcome not in ['w', 'l', 'W', 'L']:
-    #         await ctx.send("You must provide a W for win or L for lost")
-    #     else:
-    #         outcome = 'win' if outcome.lower() == 'w' else 'loss'
-    #     member = m_search(ctx, member)
-    #     f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
-    #     fi = {'beast': beast, 'outcome': outcome}
-    #     fight = {**f, **fi}
-    #     await db.RobBot.arena.insert_one(fight)
-    #     await insert_transaction(ctx, 'fight_beast', (beast, outcome), f)
-    #     e = discord.Embed(title='Arena Fight',
-    #                       type='rich',
-    #                       description=f'Executed by {ctx.author.display_name}',
-    #                       colour=self.add_color if outcome == 'win' else self.del_color)
-    #     e.set_footer(text=f'for {member.display_name}')
-    #     e.set_thumbnail(url=member.avatar_url)
-    #     e.add_field(name=beast.title(), value=f'Resulted in a {outcome}')
-    #     await ctx.send(embed=e, delete_after=90)
-    #
-    # @checks.is_dm()
-    # @commands.command(name='fight_record')
-    # async def fight_record(self, ctx, member):
-    #     """
-    #     Usage: fight_record [member]
-    #     """
-    #     await ctx.message.delete()
-    #     member = m_search(ctx, member)
-    #     f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
-    #     fights = db.RobBot.arena.find(f)
-    #     e = discord.Embed(title='Arena Fight Record',
-    #                       type='rich',
-    #                       description=f'{member.display_name}',
-    #                       colour=self.info_color)
-    #     e.set_footer(text=f'executed by: {ctx.author.display_name} ')
-    #     e.set_thumbnail(url=member.avatar_url)
-    #     for fight in await fights.to_list(length=10):
-    #         e.add_field(name=fight["_id"].generation_time.date(), value=f'{fight["beast"]} - *{fight["outcome"].title()}*')
-    #     await ctx.send(embed=e, delete_after=90)
-    #
-    # @checks.is_dm()
-    # @commands.command(name='arena')
-    # async def arena_workflow(self, ctx):
-    #     """
-    #     Workflow for Arena Beasts
-    #     """
-    #     def workflow_m_check(m):
-    #         if m.author.id == ctx.author.id:
-    #             return True
-    #
-    #     await ctx.message.delete()
-    #     # get a valid member
-    #     await ctx.send("Who got in a fight?")
-    #     fmember = await client.wait_for('message', check=workflow_m_check, timeout=30)
-    #     member = m_search(ctx, fmember.content)
-    #     # get the beast
-    #     await ctx.send("What beast?")
-    #     beast = await client.wait_for('message', check=workflow_m_check, timeout=30)
-    #     #get the outcome
-    #     await ctx.send(f'Did {member.display_name} `win` or `loss`?')
-    #     outcome = await client.wait_for('message', check=workflow_m_check, timeout=30)
-    #     #build the database entry
-    #     f = {'member_id': str(member.id), 'server_id': str(ctx.guild.id)}
-    #     fi = {'beast': beast.content, 'outcome': outcome.content}
-    #     fight = {**f, **fi}
-    #     await db.RobBot.arena.insert_one(fight)
-    #     await insert_transaction(ctx, 'fight_beast', (beast.content, outcome.content), f)
-    #     e = discord.Embed(title='Arena Fight',
-    #                       type='rich',
-    #                       description=f'{member.display_name}',
-    #                       colour=self.add_color)
-    #     e.set_footer(text=f'exec by: {ctx.author.display_name} ')
-    #     e.set_thumbnail(url=member.avatar_url)
-    #     e.add_field(name=beast.content.title(), value=f'Resulted in a {outcome.content.title()}')
-    #
-    #     await beast.delete()
-    #     await fmember.delete()
-    #     await outcome.delete()
-    #
-    #     await ctx.send(embed=e, delete_after=90)
-
-
 
 
 def setup(bot):
