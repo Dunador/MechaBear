@@ -10,6 +10,7 @@ def is_owner():
             return True
         else:
             ctx.send("You are not the Owner of this bot, I DONT KNOW YOU!")
+
     return commands.check(predicate)
 
 
@@ -23,6 +24,7 @@ def is_admin():
                 return True
         await ctx.send("You are not an admin")
         return False
+
     return commands.check(predicate)
 
 
@@ -33,6 +35,7 @@ def is_dm():
                 return True
         else:
             await ctx.send("You are not a DM/GM")
+
     return commands.check(predicate)
 
 
@@ -43,5 +46,5 @@ def is_guild_master():
                 return True
         else:
             await ctx.send("You are not a Guild Master")
-    return commands.check(predicate)
 
+    return commands.check(predicate)

@@ -7,7 +7,7 @@ class BackgroundTasks(commands.Cog):
 
     def __init__(self, bot):
         self.index = 0
-        self.im_awake.start()
+        # self.im_awake.start()
         self.do_quote.start()
         self.bot = bot
         self.quotes = ICE_QUOTES
@@ -15,21 +15,21 @@ class BackgroundTasks(commands.Cog):
         self.guild = None
 
     def cog_unload(self):
-        self.im_awake.cancel()
+        self.do_quote.cancel()
 
     def load_f(self):
         self.guild = client.get_guild(435645321029353472)
         self.channel = self.guild.get_channel(829174177532739644)
 
-    @tasks.loop(hours=1)
-    async def im_awake(self):
-        await self.channel.send("I'm alive. I check this every hour..")
-
-    @im_awake.before_loop
-    async def before_awake(self):
-        print('waiting...')
-        await self.bot.wait_until_ready()
-        self.load_f()
+    # @tasks.loop(hours=1)
+    # async def im_awake(self):
+    #     await self.channel.send("I'm alive. I check this every hour..")
+    #
+    # @im_awake.before_loop
+    # async def before_awake(self):
+    #     print('waiting...')
+    #     await self.bot.wait_until_ready()
+    #     self.load_f()
 
     @tasks.loop(hours=3)
     async def do_quote(self):
@@ -38,6 +38,7 @@ class BackgroundTasks(commands.Cog):
     @do_quote.before_loop
     async def before_awake(self):
         await self.bot.wait_until_ready()
+        self.load_f()
 
     # @tasks.loop(hours=24)
     # async def look_for_inactives(self):
