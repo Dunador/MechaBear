@@ -1,4 +1,0 @@
-discord
-dislash
-pymongo[srv]
-motor
