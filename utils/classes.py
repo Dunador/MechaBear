@@ -70,10 +70,29 @@ class DmQuest:
                                                         mentionable=True,
                                                         reason=f'New Quest created by {self.owner.display_name} in MechaBear')
         self.category = await ctx.guild.create_category(name=f'🏷{self.quest_name}🏷')
-        self.rp_channel = await self.category.create_text_channel(
-            name=f'🎭rp-{self.quest_name}', overwrites={self.quest_role: PermissionOverwrite(send_messages=True)})
-        self.ooc_channel = await self.category.create_text_channel(name=f'🎲ooc-{self.quest_name}')
-        self.dm_channel = await self.category.create_text_channel(name=f'🧩dm-{self.quest_name}')
-
+        # overwrites = {self.quest_role: PermissionOverwrite(send_messages=True),
+        #               self.server.default_role: PermissionOverwrite(read_messages=False)}
+        # dm_overwrites = {self.server.default_role: PermissionOverwrite(read_messages=False)}
+        self.rp_channel = \
+            await self.category.create_text_channel(
+                name=f'🎭rp-{self.quest_name}', overwrites=overwrites)
+        self.ooc_channel = \
+            await self.category.create_text_channel(
+                name=f'🎲ooc-{self.quest_name}', overwrites=overwrites)
+        self.dm_channel = \
+            await self.category.create_text_channel(
+                name=f'🧩dm-{self.quest_name}', overwrites=dm_overwrites)
         self.quest_members = []
         return self
+
+    def save_quest(self):
+        dm_quest = {
+            "quest_owner": str(self.owner.id),
+            "quest_server": str(self.server.id),
+            "quest_name": self.quest_name,
+            "quest_role": str(self.quest_role.id),
+            "quest_category": str(self.category.id),
+            "quest_members": self.quest_members
+        }
+        print(dm_quest)
+        return
