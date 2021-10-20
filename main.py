@@ -1,13 +1,9 @@
-from dislash import InteractionClient
 from discord.ext import commands
 import discord
 import motor.motor_asyncio
 import bot_config as config
 ####
 from dislash import *
-
-db = motor.motor_asyncio.AsyncIOMotorClient(
-    f"mongodb+srv://{config.DB_USER}:{config.DB_PASSWORD}@{config.MONGO_URL}")
 
 intents = discord.Intents(
     guilds=True, members=True, messages=True, reactions=True,
@@ -20,6 +16,10 @@ bot = commands.Bot(
     case_insensitive=True,
     intents=intents
 )
+# instance of the database
+db = motor.motor_asyncio.AsyncIOMotorClient(
+    f"mongodb+srv://{config.DB_USER}:{config.DB_PASSWORD}@{config.MONGO_URL}")
+bot.__setattr__("db", db.Mecha)
 
 i_client = InteractionClient(bot, test_guilds=config.SLASH_GUILDS)
 
@@ -32,15 +32,10 @@ async def on_ready():
     print(bot.user)
 
 
-extensions = ['cogs.characters', 'cogs.owner', 'cogs.devTools', 'cogs.twitter', 'cogs.arena', 'cogs.help',
-              'cogs.highlights', 'cogs.guilds', 'cogs.slash', 'cogs.todos']
-
-for extension in extensions:
-    bot.load_extension(extension)
+for cog in config.cogs:
+    bot.load_extension(f'cogs.{cog.rstrip(".py")}')
 
 token = config.TOKEN
 bot.run(token)
-
-
 
 # TODO: Role Sign-up, # Welcome Questionnaire # Character Submission # VSheet Application # Quest Tag —> Role-sign-up

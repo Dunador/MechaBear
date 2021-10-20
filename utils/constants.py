@@ -1,7 +1,24 @@
-from discord import Permissions
+from disnake import PermissionOverwrite
 
-EVERYONE_PERMS = (Permissions(0), Permissions(1024))
-ME_PERMS = (Permissions(1024), Permissions(0))
-SYSTEM_BOT_PERMS = (Permissions(36871952), Permissions(0))
-QUEST_ROLE_PERMS = (Permissions(2048), Permissions(1024))
-
+CHANNEL_ADMIN = PermissionOverwrite(
+    read_messages=True,
+    send_messages=True,
+    manage_messages=True,
+    manage_channels=True,
+    read_message_history=True
+)
+CHANNEL_READ_WRITE = PermissionOverwrite(
+    read_messages=True,
+    send_messages=True,
+    read_message_history=True,
+)
+CHANNEL_HIDDEN = PermissionOverwrite(
+    read_messages=False,
+    send_messages=False,
+    read_message_history=False
+)
+CHANNEL_READ = PermissionOverwrite(
+    read_messages=True,
+    send_messages=False,
+    read_message_history=True
+)

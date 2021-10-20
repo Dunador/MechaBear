@@ -1,15 +1,23 @@
 from discord.ext import commands
-import bot_config
+from bot_config import *
+
+
+def is_god():
+    async def predicate(ctx):
+        if str(ctx.author.id) == BOT_AUTHOR_ID:
+            return True
+        else:
+            ctx.send("You are not the Owner of this bot, I DON\'T KNOW YOU!")
+
+    return commands.check(predicate)
 
 
 def is_owner():
     async def predicate(ctx):
-        if str(ctx.author.id) == bot_config.BOT_AUTHOR_ID:
-            return True
-        elif "Admin" in [role.name for role in ctx.author.roles]:
+        if ctx.author.id == ctx.guild.owner.id:
             return True
         else:
-            ctx.send("You are not the Owner of this bot, I DONT KNOW YOU!")
+            ctx.send("You are not the Guild Owner, Only he has the power. ")
 
     return commands.check(predicate)
 

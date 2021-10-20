@@ -11,3 +11,7 @@ MONGO_DB = os.environ.get('MONGO_DB')
 # DEFAULT_STATUS = os.environ.get('DISCORD_STATUS', f'API')
 
 SLASH_GUILDS = [435645321029353472]
+
+# cogs
+cogs = os.listdir("./cogs")
+cogs.remove("__pycache__") if "__pycache__" in cogs else 0
