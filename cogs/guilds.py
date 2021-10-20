@@ -1,6 +1,6 @@
-import discord
+import disnake
 from dislash import *
-from discord.ext import commands
+from disnake.ext import commands
 from utils import checks
 from main import db
 from utils.helpers import *
@@ -15,9 +15,9 @@ class GuildCommands(commands.Cog, name='Guild Commands'):
 
     def __init__(self, bot):
         self.bot = bot
-        self.add_color = discord.Colour.green()
-        self.del_color = discord.Colour.red()
-        self.info_color = discord.Colour.orange()
+        self.add_color = disnake.Colour.green()
+        self.del_color = disnake.Colour.red()
+        self.info_color = disnake.Colour.orange()
         self.f = {}
 
     @slash_command(description="Guild Commands")
@@ -40,9 +40,9 @@ class GuildCommands(commands.Cog, name='Guild Commands'):
         t = {'exec_by': str(inter.author.id), 'transaction': 'add_guild', 'data': guild_name.title(),
              'timestamp': datetime.utcnow()}
         await db.RobBot.transactions.insert_one({**t, **f})
-        await member.add_roles(discord.utils.get(inter.guild.roles, name="Guild Master"))
+        await member.add_roles(disnake.utils.get(inter.guild.roles, name="Guild Master"))
         # build embed
-        e = discord.Embed(title='Add a Guild',
+        e = disnake.Embed(title='Add a Guild',
                           type='rich',
                           description=f'',
                           colour=self.add_color)
@@ -90,7 +90,7 @@ class GuildCommands(commands.Cog, name='Guild Commands'):
         await guild_msg.delete()
         await char_msg.delete()
         # build embed
-        e = discord.Embed(title=guild_inter.select_menu.selected_options[0].label,
+        e = disnake.Embed(title=guild_inter.select_menu.selected_options[0].label,
                           type='rich',
                           description="",
                           colour=self.add_color)
@@ -112,7 +112,7 @@ class GuildCommands(commands.Cog, name='Guild Commands'):
         if not selected_guild:
             return await inter.reply("No guilds found")
         # embed
-        e = discord.Embed(title=selected_guild["guild_name"],
+        e = disnake.Embed(title=selected_guild["guild_name"],
                           type='rich',
                           description=f'',
                           colour=self.info_color)

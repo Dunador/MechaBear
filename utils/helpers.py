@@ -1,4 +1,4 @@
-import discord
+import disnake
 from main import bot as client
 from re import search, IGNORECASE
 from datetime import datetime
@@ -11,7 +11,7 @@ def m_search(ctx, fuzzy_string):
                 for m in g.members:
                     if search(str(fuzzy_string), str(m.display_name), flags=IGNORECASE) and not m.bot:
                         return m
-    elif type(fuzzy_string) is discord.Member:
+    elif type(fuzzy_string) is disnake.Member:
         return fuzzy_string
     else:
         return False

@@ -1,4 +1,4 @@
-from discord.ext import commands
+from disnake.ext import commands
 from utils.helpers import *
 from dislash import *
 from main import db, bot as client
@@ -13,9 +13,9 @@ class Characters(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.add_color = discord.Colour.green()
-        self.del_color = discord.Colour.red()
-        self.info_color = discord.Colour.orange()
+        self.add_color = disnake.Colour.green()
+        self.del_color = disnake.Colour.red()
+        self.info_color = disnake.Colour.orange()
         self.f = {}
 
     @slash_command(description="Character Commands")
@@ -43,7 +43,7 @@ class Characters(commands.Cog):
         t = {'exec_by': str(inter.author.id), 'transaction': 'add_pc', 'data': char_doc, 'timestamp': datetime.utcnow()}
         await db.RobBot.transactions.insert_one({**t, **self.f})
         # Build Embed
-        e = discord.Embed(title='Add Player Character',
+        e = disnake.Embed(title='Add Player Character',
                           type='rich',
                           description=f'{inter.author.display_name}',
                           colour=self.add_color)
@@ -79,7 +79,7 @@ class Characters(commands.Cog):
         t = {'exec_by': str(inter.author.id), 'transaction': 'del_pc', 'data': pc_to_del, 'timestamp': datetime.utcnow()}
         await db.RobBot.transactions.insert_one({**t, **self.f})
         # Build Embed
-        e = discord.Embed(title='Delete Player Character',
+        e = disnake.Embed(title='Delete Player Character',
                           type='rich',
                           description=f'{inter.author.display_name}',
                           colour=self.del_color)
@@ -122,7 +122,7 @@ class Characters(commands.Cog):
         t = {'exec_by': str(inter.author.id), 'transaction': 'kill_pc', 'data':pc_to_kill, 'timestamp': datetime.utcnow()}
         await db.RobBot.transactions.insert_one({**t, **self.f})
         # Build Embed
-        e = discord.Embed(title='Kill a Player Character',
+        e = disnake.Embed(title='Kill a Player Character',
                           type='rich',
                           description=f'{inter.author.display_name}',
                           colour=self.del_color)
@@ -165,7 +165,7 @@ class Characters(commands.Cog):
         t = {'exec_by': str(inter.author.id), 'transaction': 'revive_pc', 'data': pc_to_kill, 'timestamp': datetime.utcnow()}
         await db.RobBot.transactions.insert_one({**t, **self.f})
         # Build Embed
-        e = discord.Embed(title='Revive a Player Character',
+        e = disnake.Embed(title='Revive a Player Character',
                           type='rich',
                           description=f'{inter.author.display_name}',
                           colour=self.add_color)
@@ -184,7 +184,7 @@ class Characters(commands.Cog):
         entries = db.RobBot.characters.find(self.f)
         # build embeds
         if not char_len:
-            e = discord.Embed(title='List Player Characters',
+            e = disnake.Embed(title='List Player Characters',
                               type='rich',
                               description=f'{inter.author.display_name}',
                               color=self.info_color)
@@ -193,7 +193,7 @@ class Characters(commands.Cog):
             e.add_field(name='None', value='No characters found.')
         else:
             async for char in entries:
-                e = discord.Embed(title=f'{char["name"].title()}',
+                e = disnake.Embed(title=f'{char["name"].title()}',
                                   type='rich',
                                   description=f'{inter.author.display_name}',
                                   color=self.info_color)
@@ -241,7 +241,7 @@ class Characters(commands.Cog):
         t = {'exec_by': str(inter.author.id), 'transaction': 'setup_psot', 'data': c, 'timestamp': datetime.utcnow()}
         await db.RobBot.transactions.insert_one({**t, **self.f})
         # build embeds
-        e = discord.Embed(title='Peregrine Post Setup',
+        e = disnake.Embed(title='Peregrine Post Setup',
                           type='rich',
                           description=f'{char}',
                           colour=self.info_color)

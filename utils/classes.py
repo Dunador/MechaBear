@@ -1,5 +1,5 @@
-from discord import Member, Permissions, PermissionOverwrite
-from discord.ext.commands import Context
+from disnake import Member, Permissions, PermissionOverwrite
+from disnake.ext.commands import Context
 from main import db
 
 

@@ -1,4 +1,4 @@
-from discord.ext import tasks, commands
+from disnake.ext import tasks, commands
 from main import bot as client
 from random import randint
 from utils.menu_options import *

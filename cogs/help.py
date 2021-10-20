@@ -1,6 +1,6 @@
-from discord.ext import commands
+from disnake.ext import commands
 from dislash import *
-from discord import Embed, Color
+from disnake import Embed, Color
 from utils.pagination import Element
 import asyncio
 

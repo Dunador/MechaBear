@@ -1,6 +1,6 @@
-import discord
+import disnake
 from dislash import *
-from discord.ext import commands
+from disnake.ext import commands
 from utils import checks
 from main import db
 from utils.helpers import *
@@ -13,9 +13,9 @@ class TodoCommands(commands.Cog, name='Todo Commands'):
 
     def __init__(self, bot):
         self.bot = bot
-        self.add_color = discord.Colour.green()
-        self.del_color = discord.Colour.red()
-        self.info_color = discord.Colour.orange()
+        self.add_color = disnake.Colour.green()
+        self.del_color = disnake.Colour.red()
+        self.info_color = disnake.Colour.orange()
         self.f = {}
 
     @slash_command(description="Add TODO to your list")

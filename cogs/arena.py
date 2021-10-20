@@ -1,4 +1,4 @@
-from discord.ext import commands
+from disnake.ext import commands
 import utils.checks as checks
 from main import db, bot as client
 from utils.pipelines import profile_pipeline, mod_pipeline
@@ -15,9 +15,9 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
 
     def __init__(self, bot):
         self.bot = bot
-        self.add_color = discord.Colour.green()
-        self.del_color = discord.Colour.red()
-        self.info_color = discord.Colour.orange()
+        self.add_color = disnake.Colour.green()
+        self.del_color = disnake.Colour.red()
+        self.info_color = disnake.Colour.orange()
         self.f = {}
 
     @slash_command(description='Arena Commands')
@@ -69,7 +69,7 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
                     t = {'exec_by': str(inter.author.id), 'transaction': 'add_fight', 'data': f,
                          'timestamp': datetime.utcnow()}
                     await db.RobBot.transactions.insert_one({**t, **f})
-                    e = discord.Embed(title='Add a Fight Record',
+                    e = disnake.Embed(title='Add a Fight Record',
                                       type='rich',
                                       description=f'`{f["character_name"]}` fought `{f["beast_name"]}` and resulted in a `{f["outcome"]}`',
                                       colour=self.del_color if f["outcome"] == "Loss" else self.add_color)
@@ -135,7 +135,7 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
                     t = {'exec_by': str(inter.author.id), 'transaction': 'add_pvp', 'data': [f,g],
                          'timestamp': datetime.utcnow()}
                     await db.RobBot.transactions.insert_one({**t, **f})
-                    e = discord.Embed(title='Add a PvP Fight Record',
+                    e = disnake.Embed(title='Add a PvP Fight Record',
                                       type='rich',
                                       description=f'`{f["character_name"]}` fought `{g["character_name"]}` and resulted in a `{f["outcome"]}` for {f["character_name"]}',
                                       colour=self.del_color if f["outcome"] == "Loss" else self.add_color)
@@ -185,7 +185,7 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
             if not fight_count:
                 return await inter.reply("Member has no Playable Characters set up.")
             fight_list = db.RobBot.arena.find(f).sort('_id', DESCENDING)
-            e = discord.Embed(title='Fight Record',
+            e = disnake.Embed(title='Fight Record',
                               type='rich',
                               description=f'Viewing Fight Record for `{char_inter.component.label}`',
                               colour=self.info_color)
@@ -209,7 +209,7 @@ class ArenaCommands(commands.Cog, name='Arena Commands'):
         async def chose_beast(beast_inter):
             await beast_msg.delete()
             fight_list = db.RobBot.arena.find({"beast_name": beast_inter.component.label}).sort('_id', DESCENDING)
-            e = discord.Embed(title='Fight Record',
+            e = disnake.Embed(title='Fight Record',
                               type='rich',
                               description=f'Viewing Fight Record for `{beast_inter.component.label}`',
                               colour=self.info_color)

@@ -1,5 +1,5 @@
-import discord
-from discord.ext import commands
+import disnake
+from disnake.ext import commands
 import utils.checks as bot_checks
 from dislash import slash_command,user_command, ContextMenuInteraction
 from main import db
@@ -13,9 +13,9 @@ class OwnerCommands(commands.Cog, name='Owner'):
 
     def __init__(self, bot):
         self.bot = bot
-        self.add_color = discord.Colour.green()
-        self.del_color = discord.Colour.red()
-        self.info_color = discord.Colour.orange()
+        self.add_color = disnake.Colour.green()
+        self.del_color = disnake.Colour.red()
+        self.info_color = disnake.Colour.orange()
         self.f = {}
 
     @bot_checks.is_owner()
@@ -33,7 +33,7 @@ class OwnerCommands(commands.Cog, name='Owner'):
         t = {'exec_by': str(inter.author.id), 'transaction': 'give_token', 'data': 1, 'timestamp': datetime.utcnow()}
         await db.RobBot.transactions.insert_one({**t, **f})
         # Build Embed
-        e = discord.Embed(title='Give Token',
+        e = disnake.Embed(title='Give Token',
                           type='rich',
                           description=f'{inter.author.display_name}',
                           colour=self.add_color)
@@ -64,7 +64,7 @@ class OwnerCommands(commands.Cog, name='Owner'):
     #     else:
     #         member = m_search(ctx, member)
     #     p = mod_pipeline(member.id, ctx.guild.id)
-    #     e = discord.Embed(title='Profile Viewer',
+    #     e = disnake.Embed(title='Profile Viewer',
     #                       type='rich',
     #                       description=f'Viewing profile for {member.name}')
     #     e.set_footer(text=f'{member.display_name}')

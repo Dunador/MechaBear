@@ -1,6 +1,6 @@
-from discord.ext import commands
+from disnake.ext import commands
 from dislash import *
-import discord
+import disnake
 import utils.checks as checks
 from main import db, bot as client
 from utils.pipelines import profile_pipeline, mod_pipeline

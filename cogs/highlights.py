@@ -1,8 +1,5 @@
-from discord.ext import commands
-from dislash import *
-from discord import Embed, Color
-from utils.pagination import Element
-import asyncio
+from disnake.ext import commands
+from disnake import Embed, Color
 from main import bot as client
 
 

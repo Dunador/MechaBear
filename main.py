@@ -1,11 +1,11 @@
-from discord.ext import commands
-import discord
+from disnake.ext import commands
+import disnake
 import motor.motor_asyncio
 import bot_config as config
 ####
 from dislash import *
 
-intents = discord.Intents(
+intents = disnake.Intents(
     guilds=True, members=True, messages=True, reactions=True,
     bans=False, emojis=False, integrations=False, webhooks=True, invites=False, voice_states=False, presences=False,
     typing=False

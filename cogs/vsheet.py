@@ -1,5 +1,5 @@
-from discord.ext import commands
-from discord import Colour
+from disnake.ext import commands
+from disnake import Colour
 from utils import checks
 
 

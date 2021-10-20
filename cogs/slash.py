@@ -1,4 +1,4 @@
-from discord.ext import commands
+from disnake.ext import commands
 from dislash import slash_command, ActionRow, Button, ButtonStyle, ResponseType, message_command, ContextMenuInteraction
 import utils.checks as checks
 
