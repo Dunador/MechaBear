@@ -19,7 +19,7 @@ bot = commands.Bot(
 # instance of the database
 db = motor.motor_asyncio.AsyncIOMotorClient(
     f"mongodb+srv://{config.DB_USER}:{config.DB_PASSWORD}@{config.MONGO_URL}")
-bot.__setattr__("db", db.Mecha)
+bot.__setattr__("db", db.RobBot)
 
 i_client = InteractionClient(bot, test_guilds=config.SLASH_GUILDS)
 
