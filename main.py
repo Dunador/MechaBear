@@ -33,7 +33,7 @@ async def on_ready():
 
 
 for cog in config.cogs:
-    bot.load_extension(f'cogs.{cog.rstrip(".py")}')
+    bot.load_extension(f'cogs.{cog[:-3]}')
 
 token = config.TOKEN
 bot.run(token)
